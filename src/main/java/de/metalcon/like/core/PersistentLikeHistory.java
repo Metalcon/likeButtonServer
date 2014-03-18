@@ -39,7 +39,7 @@ public class PersistentLikeHistory {
     /*
      * The maximum number of open file handles allowed.
      */
-    private static final int MaximumOpenFileHandles = 10000;
+    private static final int MaximumOpenFileHandles = 1000;
 
     /*
      * The number of currently opened file handles

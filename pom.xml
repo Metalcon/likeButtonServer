@@ -10,6 +10,14 @@
  <artifactId>like-server</artifactId>
  <version>0.0.1-SNAPSHOT</version>
 
+<properties>
+    <!-- Test -->
+    <junit.version>4.11</junit.version>
+    <mockito.version>1.9.5</mockito.version>
+    <hamcrest.version>1.3</hamcrest.version>
+
+</properties>
+
  <name>like</name>
  <url>https://github.com/Metalcon/likeButtonServer</url>
 
