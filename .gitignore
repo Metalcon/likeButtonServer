@@ -1,3 +1,4 @@
+data/
 # ignore Maven output directory
 target/
 # ignore Eclipse files
@@ -7,7 +8,6 @@ target/
 .metadata/
 .settings/
 bin/
-data/
 
 # Java class files
 *.class
