@@ -129,7 +129,7 @@ public class LevelDBHandler {
 			 * No empty position found. Array has to be extended
 			 */
 			if (lastEmptyPointer == valueArray.length) {
-				int newLength = (int) (2 * valueArray.length + 1);
+				int newLength = 2 * valueArray.length + 1;
 				int oldLength = valueArray.length;
 				long[] tmp = new long[newLength];
 				System.arraycopy(valueArray, 0, tmp, 0, oldLength);

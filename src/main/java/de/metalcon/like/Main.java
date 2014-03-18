@@ -20,7 +20,7 @@ import de.metalcon.like.storage.PersistentUUIDSetLevelDB;
  */
 public class Main {
 
-	private static final String DATA_DIR = "../data/";
+	private static final String DATA_DIR = "/home/kunzejo/git/likeButtonServer/data/";
 	private static final String METALCON_FILE = DATA_DIR
 			+ "metalcon-all-hashed.csv";
 	private static final String METALCON_USER_FILE = DATA_DIR
