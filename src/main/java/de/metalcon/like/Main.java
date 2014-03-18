@@ -5,14 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import de.metalcon.like.data.HaveInCommons;
-import de.metalcon.like.data.Like.Vote;
-import de.metalcon.like.data.Node;
-import de.metalcon.like.data.NodeFactory;
-import de.metalcon.like.data.NormalizedLikeRetrieval;
-import de.metalcon.like.data.PersistentLikeHistory;
-import de.metalcon.like.storage.LevelDBHandler;
-import de.metalcon.like.storage.PersistentUUIDSetLevelDB;
+import de.metalcon.like.api.LikeGraphApi;
+import de.metalcon.like.api.LikeService;
+import de.metalcon.like.api.Vote;
+import de.metalcon.like.core.LevelDBHandler;
+import de.metalcon.like.core.Node;
+import de.metalcon.like.core.NodeFactory;
+import de.metalcon.like.core.PersistentLikeHistory;
+import de.metalcon.like.core.PersistentUUIDSetLevelDB;
 
 /**
  * Hello world!
@@ -20,226 +20,239 @@ import de.metalcon.like.storage.PersistentUUIDSetLevelDB;
  */
 public class Main {
 
-	private static final String DATA_DIR = "/home/kunzejo/git/likeButtonServer/data/";
-	private static final String METALCON_FILE = DATA_DIR
-			+ "metalcon-all-hashed.csv";
-	private static final String METALCON_USER_FILE = DATA_DIR
-			+ "metalcon-user.csv";
-	private static final String METALCON_NONUSER_FILE = DATA_DIR
-			+ "metalcon-nonUser.csv";
-	private static final String METALCON_NONUSER_RAND_FILE = DATA_DIR
-			+ "metalcon-nonUser-random.csv";
-	private static final String METALCON_USER_SMALL_FILE = DATA_DIR
-			+ "metalcon-user-small.csv";
-	private static final String UB_SMALL_FILE = DATA_DIR + "ub-small.csv";
-	private static final String POWER_LAW_USER = DATA_DIR
-			+ "powerlaw-11023-2.5-100-200.csv";
-	private static final String POWER_LAW_USER_SMALL = DATA_DIR
-			+ "powerlaw-5000-2-1-200.csv";
-	private static final String POWER_LAW_USER_SMALL2 = DATA_DIR
-			+ "powerlaw-5000-2.5-10-200.csv";
-	private static final String POWER_LAW_USER_SMALL4 = DATA_DIR
-			+ "powerlaw-5000-2.5-100-200.csv";
+    private static final String DATA_DIR = "/media/mssd/datasets/likebutton/";
 
-	public static final int BATCH_SIZE = 100000;
+    private static final String METALCON_FILE = DATA_DIR
+            + "metalcon-all-hashed.csv";
 
-	private static HaveInCommons graph;
+    private static final String METALCON_USER_FILE = DATA_DIR
+            + "metalcon-user.csv";
 
-	public static void main(String[] args) {
-		try {
-			PersistentLikeHistory.initialize("/dev/shm/commonsDB/likesDB");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+    private static final String METALCON_NONUSER_FILE = DATA_DIR
+            + "metalcon-nonUser.csv";
 
-		graph = new NormalizedLikeRetrieval("/dev/shm/commonsDB");
-		LevelDBHandler.initialize("/dev/shm/commonsDB/levelDB");
-		PersistentUUIDSetLevelDB.initialize();
+    private static final String METALCON_NONUSER_RAND_FILE = DATA_DIR
+            + "metalcon-nonUser-random.csv";
 
-		long time = 0;
-		/*
-		 * Import all users
-		 */
-		time = importGraph(graph, METALCON_USER_FILE);
-		long nodeNum = NodeFactory.getAllNodeUUIDs().length;
-		System.out.println("Importing " + nodeNum + " users took "
-				+ (int) (time / 1E9f) + " s (" + time / 1000 / nodeNum
-				+ " µs per node)");
+    private static final String METALCON_USER_SMALL_FILE = DATA_DIR
+            + "metalcon-user-small.csv";
 
-		/*
-		 * Import Albums and Bands
-		 */
-		time = importGraph(graph, METALCON_NONUSER_RAND_FILE);
-		long newNodes = NodeFactory.getAllNodeUUIDs().length - nodeNum;
-		System.out
-				.println("Importing nonUser nodes took " + (int) (time / 1E9f)
-						+ " s (" + newNodes + " new nodes added)");
+    private static final String UB_SMALL_FILE = DATA_DIR + "ub-small.csv";
 
-		/*
-		 * Update all nodes
-		 */
-		time = updateAllNodes();
-		System.out.println("Updating " + NodeFactory.getAllNodeUUIDs().length
-				+ " nodes took " + (int) (time / 1E9f) + " s (" + time / 1000
-				/ NodeFactory.getAllNodeUUIDs().length + " µs per node)");
+    private static final String POWER_LAW_USER = DATA_DIR
+            + "powerlaw-11023-2.5-100-200.csv";
 
-		/*
-		 * Process some getInCommon calls
-		 */
-		final long[] uuids = NodeFactory.getAllNodeUUIDs();
+    private static final String POWER_LAW_USER_SMALL = DATA_DIR
+            + "powerlaw-5000-2-1-200.csv";
 
-		Random rand = new Random();
-		int runs = 100000, found = 0;
-		long start = System.nanoTime();
-		for (int i = 0; i < runs; i++) {
-			int commons = testInCommons(graph,
-					uuids[rand.nextInt(uuids.length)],
-					uuids[rand.nextInt(uuids.length)], false);
-			if (commons > 0) {
-				found++;
-			}
-		}
-		time = System.nanoTime() - start;
-		System.out.println("Generating commons for " + runs
-				+ " node pairs took " + (int) (time / 1E6f) + " ms finding "
-				+ found + " non empty lists (" + time / 1000 / runs
-				+ " µs per node)");
+    private static final String POWER_LAW_USER_SMALL2 = DATA_DIR
+            + "powerlaw-5000-2.5-10-200.csv";
 
-		testInCommons(graph, 1, 2, true);
-	}
+    private static final String POWER_LAW_USER_SMALL4 = DATA_DIR
+            + "powerlaw-5000-2.5-100-200.csv";
 
-	public static long updateAllNodes() {
-		long start = System.nanoTime();
-		for (long uuid : NodeFactory.getAllNodeUUIDs()) {
-			Node n = NodeFactory.getNode(uuid);
-			n.updateCommons();
-		}
-		return System.nanoTime() - start;
-	}
+    public static final int BATCH_SIZE = 100000;
 
-	public static int testInCommons(HaveInCommons graph, long from, long to,
-			boolean verbose) {
-		long start = System.nanoTime();
-		long[] commons = graph.getCommonNodes(from, to);
-		long end = System.nanoTime();
+    private static LikeGraphApi graph;
 
-		if (commons != null) {
-			if (verbose) {
-				System.out.println("getCommonNodes needed: " + (end - start)
-						/ 1000 + " microseconds for " + commons.length
-						+ " commons");
-			}
-			if (commons.length > 0) {
-				if (!verbose) {
-					System.out.println("getCommonNodes needed: "
-							+ (end - start) / 1000 + " microseconds for "
-							+ commons.length + " commons");
-				}
-				if (verbose) {
-					System.out.println("Common length: " + commons.length);
-					for (long s : commons) {
-						System.out.println(s);
-					}
-				}
-				return commons.length;
-			} else {
-				if (verbose) {
-					System.out.println(from + " and " + to
-							+ " have nothing in common");
-				}
-				return 0;
-			}
-		} else {
-			if (verbose) {
-				System.out.println(from + " and " + to
-						+ " have nothing in common");
-			}
-			return -1;
-		}
+    public static void main(String[] args) {
+        try {
+            PersistentLikeHistory.initialize("/dev/shm/commonsDB/likesDB");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
-	}
+        graph = new LikeService("/dev/shm/commonsDB");
+        LevelDBHandler.initialize("/dev/shm/commonsDB/levelDB");
+        PersistentUUIDSetLevelDB.initialize();
 
-	private static long importGraph(HaveInCommons graphImpl, String dataFile) {
-		long start = System.nanoTime();
-		long last = System.nanoTime();
-		long now;
+        long time = 0;
+        /*
+         * Import all users
+         */
+        time = importGraph(graph, METALCON_USER_FILE);
+        long nodeNum = NodeFactory.getAllNodeUUIDs().length;
+        System.out.println("Importing " + nodeNum + " users took "
+                + (int) (time / 1E9f) + " s (" + time / 1000 / nodeNum
+                + " µs per node)");
 
-		try (BufferedReader br = new BufferedReader(new FileReader(dataFile))) {
-			String line = "";
-			long edgeCount = 0;
-			long nodeCount = 0;
-			while ((line = br.readLine()) != null) {
-				String[] values = line.split("\\s");
-				if (values.length < 2) {
-					continue;
-				} else if (values.length == 2) {
-					graphImpl.putEdge(Long.parseLong(values[0]),
-							Long.parseLong(values[1]), Vote.UP);
-					edgeCount++;
+        /*
+         * Import Albums and Bands
+         */
+        time = importGraph(graph, METALCON_NONUSER_RAND_FILE);
+        long newNodes = NodeFactory.getAllNodeUUIDs().length - nodeNum;
+        System.out
+                .println("Importing nonUser nodes took " + (int) (time / 1E9f)
+                        + " s (" + newNodes + " new nodes added)");
 
-					// graphImpl.putEdge(Long.parseLong(values[1]),
-					// Long.parseLong(values[0]));
-					// edgeCount++;
-				} else {
-					for (int i = 1; i < values.length; i++) {
-						graphImpl.putEdge(Long.parseLong(values[0]),
-								Long.parseLong(values[i]), Vote.UP);
-						edgeCount++;
-					}
-				}
-				nodeCount++;
+        /*
+         * Update all nodes
+         */
+        time = updateAllNodes();
+        System.out.println("Updating " + NodeFactory.getAllNodeUUIDs().length
+                + " nodes took " + (int) (time / 1E9f) + " s (" + time / 1000
+                / NodeFactory.getAllNodeUUIDs().length + " µs per node)");
 
-				if (edgeCount % BATCH_SIZE == 0) {
-					// print Statistics
-					now = System.nanoTime();
+        /*
+         * Process some getInCommon calls
+         */
+        final long[] uuids = NodeFactory.getAllNodeUUIDs();
 
-					System.out.println("#nodes=" + nodeCount + "\t" + "#edges="
-							+ edgeCount + "\t" + "time total="
-							+ (long) ((now - start) / 1E9f) + "sec.\t"
-							+ "batch time=" + (long) ((now - last) / 1E6f)
-							+ "msec.");
+        Random rand = new Random();
+        int runs = 100000, found = 0;
+        long start = System.nanoTime();
+        for (int i = 0; i < runs; i++) {
+            int commons =
+                    testInCommons(graph, uuids[rand.nextInt(uuids.length)],
+                            uuids[rand.nextInt(uuids.length)], false);
+            if (commons > 0) {
+                found++;
+            }
+        }
+        time = System.nanoTime() - start;
+        System.out.println("Generating commons for " + runs
+                + " node pairs took " + (int) (time / 1E6f) + " ms finding "
+                + found + " non empty lists (" + time / 1000 / runs
+                + " µs per node)");
 
-					System.err
-							.println((int) (BATCH_SIZE * 2 * 1E9f / (now - last))
-									+ " edges/sec");
+        testInCommons(graph, 1, 2, true);
+    }
 
-					last = now;
-				}
-			}
+    public static long updateAllNodes() {
+        long start = System.nanoTime();
+        for (long uuid : NodeFactory.getAllNodeUUIDs()) {
+            Node n = NodeFactory.getNode(uuid);
+            n.updateCommons();
+        }
+        return System.nanoTime() - start;
+    }
 
-			now = System.nanoTime();
-			System.out.println("#nodes=" + nodeCount + "\t" + "#edges="
-					+ edgeCount + "\t" + "time total="
-					+ (long) ((now - start) / 1E9f) + "sec.\t" + "batch time="
-					+ (long) ((now - last) / 1E6f) + "msec.");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		return System.nanoTime() - start;
-	}
+    public static int testInCommons(
+            LikeGraphApi graph,
+            long from,
+            long to,
+            boolean verbose) {
+        long start = System.nanoTime();
+        long[] commons = graph.getCommonNodes(from, to);
+        long end = System.nanoTime();
 
-	private static void TestSingleNodePreprocessor() {
-		// System.out.println("SingleNodePreprocessorNeo4j:");
-		//
-		// SingleNodePreprocessorNeo4j processor = new
-		// SingleNodePreprocessorNeo4j(
-		// "neo4j-metalconAll");
-		//
-		// processor.generateIndex(1);
-		// processor.print(1);
-		//
-		// for (int i = 1; i < 100; ++i) {
-		// long start = System.nanoTime();
-		// if (processor.generateIndex(i)) {
-		// long end = System.nanoTime();
-		//
-		// int max = processor.print(i);
-		// System.out.println((end - start) / 1E6f + " milliseconds, "
-		// + max + " maximum elements");
-		// }
-		// }
-	}
+        if (commons != null) {
+            if (verbose) {
+                System.out.println("getCommonNodes needed: " + (end - start)
+                        / 1000 + " microseconds for " + commons.length
+                        + " commons");
+            }
+            if (commons.length > 0) {
+                if (!verbose) {
+                    System.out.println("getCommonNodes needed: "
+                            + (end - start) / 1000 + " microseconds for "
+                            + commons.length + " commons");
+                }
+                if (verbose) {
+                    System.out.println("Common length: " + commons.length);
+                    for (long s : commons) {
+                        System.out.println(s);
+                    }
+                }
+                return commons.length;
+            } else {
+                if (verbose) {
+                    System.out.println(from + " and " + to
+                            + " have nothing in common");
+                }
+                return 0;
+            }
+        } else {
+            if (verbose) {
+                System.out.println(from + " and " + to
+                        + " have nothing in common");
+            }
+            return -1;
+        }
+
+    }
+
+    private static long importGraph(LikeGraphApi graphImpl, String dataFile) {
+        long start = System.nanoTime();
+        long last = System.nanoTime();
+        long now;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(dataFile))) {
+            String line = "";
+            long edgeCount = 0;
+            long nodeCount = 0;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split("\\s");
+                if (values.length < 2) {
+                    continue;
+                } else if (values.length == 2) {
+                    graphImpl.putEdge(Long.parseLong(values[0]),
+                            Long.parseLong(values[1]), Vote.UP);
+                    edgeCount++;
+
+                    // graphImpl.putEdge(Long.parseLong(values[1]),
+                    // Long.parseLong(values[0]));
+                    // edgeCount++;
+                } else {
+                    for (int i = 1; i < values.length; i++) {
+                        graphImpl.putEdge(Long.parseLong(values[0]),
+                                Long.parseLong(values[i]), Vote.UP);
+                        edgeCount++;
+                    }
+                }
+                nodeCount++;
+
+                if (edgeCount % BATCH_SIZE == 0) {
+                    // print Statistics
+                    now = System.nanoTime();
+
+                    System.out.println("#nodes=" + nodeCount + "\t" + "#edges="
+                            + edgeCount + "\t" + "time total="
+                            + (long) ((now - start) / 1E9f) + "sec.\t"
+                            + "batch time=" + (long) ((now - last) / 1E6f)
+                            + "msec.");
+
+                    System.err
+                            .println((int) (BATCH_SIZE * 2 * 1E9f / (now - last))
+                                    + " edges/sec");
+
+                    last = now;
+                }
+            }
+
+            now = System.nanoTime();
+            System.out.println("#nodes=" + nodeCount + "\t" + "#edges="
+                    + edgeCount + "\t" + "time total="
+                    + (long) ((now - start) / 1E9f) + "sec.\t" + "batch time="
+                    + (long) ((now - last) / 1E6f) + "msec.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return System.nanoTime() - start;
+    }
+
+    private static void TestSingleNodePreprocessor() {
+        // System.out.println("SingleNodePreprocessorNeo4j:");
+        //
+        // SingleNodePreprocessorNeo4j processor = new
+        // SingleNodePreprocessorNeo4j(
+        // "neo4j-metalconAll");
+        //
+        // processor.generateIndex(1);
+        // processor.print(1);
+        //
+        // for (int i = 1; i < 100; ++i) {
+        // long start = System.nanoTime();
+        // if (processor.generateIndex(i)) {
+        // long end = System.nanoTime();
+        //
+        // int max = processor.print(i);
+        // System.out.println((end - start) / 1E6f + " milliseconds, "
+        // + max + " maximum elements");
+        // }
+        // }
+    }
 
 }

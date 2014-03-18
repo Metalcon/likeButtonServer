@@ -1,9 +1,7 @@
-package de.metalcon.like.data;
+package de.metalcon.like.core;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import de.metalcon.like.storage.PersistentUUIDSetLevelDB;
 
 /**
  * @author Jonas Kunze

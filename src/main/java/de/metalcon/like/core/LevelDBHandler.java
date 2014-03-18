@@ -1,4 +1,4 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.core;
 
 import static org.fusesource.leveldbjni.JniDBFactory.factory;
 

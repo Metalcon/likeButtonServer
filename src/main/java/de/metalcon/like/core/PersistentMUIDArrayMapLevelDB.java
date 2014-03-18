@@ -1,16 +1,16 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.core;
 
 import java.util.HashMap;
 
 /**
  * @author Jonas Kunze
  */
-public class PersistentUUIDArrayMapLevelDB {
+public class PersistentMUIDArrayMapLevelDB {
 	private static final int InitialArrayLength = 4;
 
 	LevelDBHandler dbHandler;
 
-	public PersistentUUIDArrayMapLevelDB(final long keyPrefix) {
+	public PersistentMUIDArrayMapLevelDB(final long keyPrefix) {
 		dbHandler = new LevelDBHandler(keyPrefix);
 	}
 

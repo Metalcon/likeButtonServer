@@ -1,9 +1,7 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.core;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import de.metalcon.like.data.Node;
 
 /**
  * @author Jonas Kunze
