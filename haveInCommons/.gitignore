@@ -1,4 +1,3 @@
-data/
 # ignore Maven output directory
 target/
 # ignore Eclipse files
@@ -19,3 +18,8 @@ bin/
 
 # Backup Files
 *.*~
+/neo4j-100k
+/neo4j-metalconAll
+/luceneIndex
+/commonsDB
+/commonsDB-metalcon
