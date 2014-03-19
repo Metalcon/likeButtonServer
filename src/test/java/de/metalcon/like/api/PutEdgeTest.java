@@ -1,6 +1,5 @@
 package de.metalcon.like.api;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -23,18 +22,46 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
         assertNull(likeService.getLikedInNodes(1));
     }
 
-    @Test
-    public void testNotExistentEdges() {
-        assertEquals(likeService.follows(1, 2), Vote.NEUTRAL);
+    //    @Test
+    //    public void testNotExistentEdges() {
+    //        assertEquals(likeService.follows(1, 2), Vote.NEUTRAL);
+    //
+    //        likeService.putEdge(1, 2, Vote.DOWN);
+    //        assertEquals(likeService.follows(1, 2), equals(Vote.DOWN));
+    //
+    //        likeService.putEdge(1, 2, Vote.UP);
+    //        assertEquals(likeService.follows(1, 2), equals(Vote.UP));
+    //
+    //        likeService.putEdge(1, 2, Vote.NEUTRAL);
+    //        assertEquals(likeService.follows(1, 2), equals(Vote.NEUTRAL));
+    //
+    //    }
 
-        likeService.putEdge(1, 2, Vote.DOWN);
-        assertEquals(likeService.follows(1, 2), equals(Vote.DOWN));
+    @Test
+    public void testChangeVote() {
+        assertNull(likeService.getLikedInNodes(1));
+        assertNull(likeService.getLikedInNodes(2));
+        assertNull(likeService.getLikedOutNodes(1));
+        assertNull(likeService.getLikedOutNodes(2));
 
         likeService.putEdge(1, 2, Vote.UP);
-        assertEquals(likeService.follows(1, 2), equals(Vote.UP));
+        assertNotNull(likeService.getLikedOutNodes(1));
+        assertNotNull(likeService.getLikedInNodes(2));
 
-        likeService.putEdge(1, 2, Vote.NEUTRAL);
-        assertEquals(likeService.follows(1, 2), equals(Vote.NEUTRAL));
+        assertNull(likeService.getLikedOutNodes(2));
+        assertNull(likeService.getLikedInNodes(1));
+        likeService.putEdge(1, 2, Vote.DOWN);
+        assertNotNull(likeService.getLikedOutNodes(1));
+        assertNotNull(likeService.getLikedInNodes(2));
 
+        assertNull(likeService.getLikedOutNodes(2));
+        assertNull(likeService.getLikedInNodes(1));
+
+        //        likeService.putEdge(1, 2, Vote.DOWN);
+        //        assertNull(likeService.getLikedInNodes(1));
+        //        assertNull(likeService.getLikedInNodes(2));
+        //        assertNull(likeService.getLikedOutNodes(1));
+        //        assertNull(likeService.getLikedOutNodes(2));
     }
+
 }

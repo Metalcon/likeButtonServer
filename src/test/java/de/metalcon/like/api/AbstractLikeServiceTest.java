@@ -34,9 +34,11 @@ public abstract class AbstractLikeServiceTest {
     public void setUp() throws Exception {
         if (likeService != null) {
             likeService.clearDataBase("Yes I am");
+            System.out.println("cleared");
         }
         try {
             likeService = new LikeService(TEST_FOLDER);
+            System.out.println("created new");
         } catch (Exception e) {
             e.printStackTrace();
             fail("cannot reset data base for new tests");
