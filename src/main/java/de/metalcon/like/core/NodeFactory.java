@@ -3,6 +3,8 @@ package de.metalcon.like.core;
 import java.io.IOException;
 import java.util.HashMap;
 
+import de.metalcon.exceptions.MetalconException;
+
 /**
  * @author Jonas Kunze
  */
@@ -115,5 +117,13 @@ public class NodeFactory {
 
 	public static long[] getAllNodeUUIDs() {
 		return AllNodes.toArray();
+	}
+
+	public static void clearDataBase(String areYouSure)
+			throws MetalconException {
+		if (areYouSure.equals("Yes I am")) {
+			AllNodes = null;
+			AllNodesAliveCache = new HashMap<Long, Node>();
+		}
 	}
 }

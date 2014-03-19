@@ -218,6 +218,7 @@ public class LikeService implements LikeGraphApi {
 			try {
 				LevelDBHandler.clearDataBase(areYouSure);
 				PersistentLikeHistory.clearDataBase(areYouSure);
+				NodeFactory.clearDataBase(areYouSure);
 			} catch (IOException e) {
 				throw new MetalconException("Unable to Clear LevelDB");
 			}
