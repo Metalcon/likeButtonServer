@@ -337,7 +337,7 @@ public class PersistentLikeHistory {
 		file.position(fileSize);
 		file.putInt(like.getTimestamp());
 		file.putLong(like.getMUID());
-		file.put(like.getVote().value);
+		file.put(like.getVote().flag);
 		fileSize += BytesPerLikeInFile;
 
 		file.putInt(0, fileSize);
