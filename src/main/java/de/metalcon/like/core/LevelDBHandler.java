@@ -12,6 +12,8 @@ import java.io.ObjectOutputStream;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 
+import de.metalcon.exceptions.MetalconException;
+
 public class LevelDBHandler {
 	private static DB db = null;
 
@@ -19,7 +21,18 @@ public class LevelDBHandler {
 
 	private final byte[] keyPrefix;
 
-	public static void initialize(final String DBPath) {
+	private static String DBPath_;
+
+	public static void initialize(final String DBPath) throws MetalconException {
+		File f = new File(DBPath);
+
+		if (!f.exists()) {
+			if (!f.mkdirs()) {
+				throw new MetalconException("Unable to create directory "
+						+ DBPath);
+			}
+		}
+
 		if (db == null) {
 			try {
 				Options options = new Options();
@@ -33,10 +46,11 @@ public class LevelDBHandler {
 
 				db = factory.open(new File(DBPath), options);
 			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
+				throw new MetalconException("Unable to instanciate levelDB on "
+						+ DBPath);
 			}
 		}
+		DBPath_ = DBPath;
 	}
 
 	public LevelDBHandler(final long keyPrefix) {
@@ -62,6 +76,13 @@ public class LevelDBHandler {
 		this.keyPrefix[5] = (byte) (hash >> 16);
 		this.keyPrefix[6] = (byte) (hash >> 8);
 		this.keyPrefix[7] = (byte) (hash);
+	}
+
+	public static void clearDataBase(String areYouSure) throws IOException {
+		if (areYouSure != "Yes I am") {
+			db.close();
+			IOHelper.deleteFile(new File(DBPath_));
+		}
 	}
 
 	/**

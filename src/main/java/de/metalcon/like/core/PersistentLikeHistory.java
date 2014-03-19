@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.metalcon.domain.MuidConverter;
+import de.metalcon.exceptions.MetalconException;
 import de.metalcon.like.api.Vote;
 
 /**
@@ -87,8 +88,19 @@ public class PersistentLikeHistory {
 	 * Create all folders that might be used
 	 * 
 	 * @throws IOException
+	 * @throws MetalconException
 	 */
-	public static void initialize(final String storageDir) throws IOException {
+	public static void initialize(final String storageDir)
+			throws MetalconException {
+		File f = new File(storageDir);
+
+		if (!f.exists()) {
+			if (!f.mkdirs()) {
+				throw new MetalconException("Unable to create directory "
+						+ storageDir);
+			}
+		}
+
 		PersistentLikeHistory.storageDir = storageDir;
 
 		char[] counters = new char[storageRecursiveDepth];
@@ -101,7 +113,7 @@ public class PersistentLikeHistory {
 			}
 			final File dir = new File(storageDir, relPath);
 			if (!dir.exists() && !dir.mkdirs()) {
-				throw new IOException("Unable to create "
+				throw new MetalconException("Unable to create directory "
 						+ dir.getAbsolutePath());
 			}
 			int j = 0;
@@ -111,6 +123,12 @@ public class PersistentLikeHistory {
 				}
 				counters[j++] = 0;
 			}
+		}
+	}
+
+	public static void clearDataBase(String areYouSure) throws IOException {
+		if (areYouSure != "Yes I am") {
+			IOHelper.deleteFile(new File(storageDir));
 		}
 	}
 
