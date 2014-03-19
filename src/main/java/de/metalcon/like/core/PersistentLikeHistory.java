@@ -127,7 +127,7 @@ public class PersistentLikeHistory {
 	}
 
 	public static void clearDataBase(String areYouSure) throws IOException {
-		if (areYouSure != "Yes I am") {
+		if (areYouSure.equals("Yes I am")) {
 			IOHelper.deleteFile(new File(storageDir));
 		}
 	}

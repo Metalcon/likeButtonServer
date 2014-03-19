@@ -214,9 +214,10 @@ public class LikeService implements LikeGraphApi {
 	 * @throws IOException
 	 */
 	public void clearDataBase(String areYouSure) throws MetalconException {
-		if (areYouSure != "Yes I am") {
+		if (areYouSure.equals("Yes I am")) {
 			try {
 				LevelDBHandler.clearDataBase(areYouSure);
+				PersistentLikeHistory.clearDataBase(areYouSure);
 			} catch (IOException e) {
 				throw new MetalconException("Unable to Clear LevelDB");
 			}

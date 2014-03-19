@@ -79,7 +79,7 @@ public class LevelDBHandler {
 	}
 
 	public static void clearDataBase(String areYouSure) throws IOException {
-		if (areYouSure != "Yes I am") {
+		if (areYouSure.equals("Yes I am")) {
 			db.close();
 			IOHelper.deleteFile(new File(DBPath_));
 		}
