@@ -36,7 +36,6 @@ public class LikeService implements LikeGraphApi {
 		LevelDBHandler.initialize(storageDir + "/levelDB");
 		PersistentLikeHistory.initialize(storageDir + "/likesDB");
 		PersistentUUIDSetLevelDB.initialize();
-
 		NodeFactory.initialize(storageDir);
 	}
 

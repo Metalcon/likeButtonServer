@@ -49,6 +49,9 @@ public class LevelDBHandler {
 				throw new MetalconException("Unable to instanciate levelDB on "
 						+ DBPath);
 			}
+		} else {
+			throw new MetalconException(
+					"LevelDBHandler has already been Initialized");
 		}
 		DBPath_ = DBPath;
 	}
@@ -79,9 +82,11 @@ public class LevelDBHandler {
 	}
 
 	public static void clearDataBase(String areYouSure) throws IOException {
-		if (areYouSure.equals("Yes I am")) {
+		if (areYouSure.equals("Yes I am") && db != null) {
 			db.close();
+			System.out.println("Deleting LevelDB directory " + DBPath_);
 			IOHelper.deleteFile(new File(DBPath_));
+			db = null;
 		}
 	}
 
