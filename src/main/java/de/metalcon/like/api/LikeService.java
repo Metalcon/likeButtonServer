@@ -13,7 +13,11 @@ import de.metalcon.like.core.PersistentLikeHistory;
 import de.metalcon.like.core.PersistentUUIDSetLevelDB;
 
 /**
- * @author Jonas Kunze
+ * TODO: implement Vote follows(long from, long to). This method should be O(1)
+ * put this to the interface so probably the likeserver needs to store another
+ * hashmap
+ * 
+ * @author Jonas Kunze, rpickhardt
  */
 public class LikeService implements LikeGraphApi {
 
@@ -217,5 +221,12 @@ public class LikeService implements LikeGraphApi {
 				throw new MetalconException("Unable to Clear LevelDB");
 			}
 		}
+	}
+
+	Vote follows(long from, long to) {
+		/*
+		 * TODO: To be implemented
+		 */
+		return null;
 	}
 }
