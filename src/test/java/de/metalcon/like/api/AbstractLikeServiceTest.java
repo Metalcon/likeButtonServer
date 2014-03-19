@@ -32,7 +32,9 @@ public abstract class AbstractLikeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        likeService.clear();
+        if (likeService != null) {
+            likeService.clearDataBase("Yes I am");
+        }
         try {
             likeService = new LikeService(TEST_FOLDER);
         } catch (Exception e) {
