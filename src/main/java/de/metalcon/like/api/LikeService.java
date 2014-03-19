@@ -1,6 +1,7 @@
 package de.metalcon.like.api;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -9,17 +10,22 @@ import de.metalcon.like.core.Node;
 import de.metalcon.like.core.NodeFactory;
 
 /**
- * @author Jonas Kunze
+ * TODO: implement Vote follows(long from, long to). This method should be O(1)
+ * put this to the interface so probably the likeserver needs to store another
+ * hashmap
+ * TODO: imiplement a clearDB method (this shouldbe protected and fool proof)
+ * 
+ * @author Jonas Kunze, rpickhardt
  */
 public class LikeService implements LikeGraphApi {
 
     private int edgeNum = 0;
 
     public LikeService(
-            final String storageDir) {
+            final String storageDir) throws FileNotFoundException {
         File f = new File(storageDir);
         if (!f.exists()) {
-            throw new RuntimeException("Unable to initialize "
+            throw new FileNotFoundException("Unable to initialize "
                     + this.getClass().getName()
                     + " because the storage directory does not exist: '"
                     + storageDir + "'");
@@ -193,5 +199,13 @@ public class LikeService implements LikeGraphApi {
             result[i++] = l;
         }
         return result;
+    }
+
+    Vote follows(long from, long to) {
+        return null;
+    }
+
+    protected void clear() {
+
     }
 }
