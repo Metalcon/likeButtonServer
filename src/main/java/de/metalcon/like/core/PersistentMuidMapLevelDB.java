@@ -5,12 +5,12 @@ import java.util.HashMap;
 /**
  * @author Jonas Kunze
  */
-public class PersistentMUIDArrayMapLevelDB {
+public class PersistentMuidMapLevelDB {
 	private static final int InitialArrayLength = 4;
 
 	LevelDBHandler dbHandler;
 
-	public PersistentMUIDArrayMapLevelDB(final long keyPrefix) {
+	public PersistentMuidMapLevelDB(final long keyPrefix) {
 		dbHandler = new LevelDBHandler(keyPrefix);
 	}
 

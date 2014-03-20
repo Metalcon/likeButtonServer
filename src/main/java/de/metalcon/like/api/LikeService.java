@@ -10,7 +10,7 @@ import de.metalcon.like.core.Like;
 import de.metalcon.like.core.Node;
 import de.metalcon.like.core.NodeFactory;
 import de.metalcon.like.core.PersistentLikeHistory;
-import de.metalcon.like.core.PersistentUUIDSetLevelDB;
+import de.metalcon.like.core.PersistentMuidSetLevelDB;
 
 /**
  * TODO: implement Vote follows(long from, long to). This method should be O(1)
@@ -35,7 +35,7 @@ public class LikeService implements LikeGraphApi {
 
 		LevelDBHandler.initialize(storageDir + "/levelDB");
 		PersistentLikeHistory.initialize(storageDir + "/likesDB");
-		PersistentUUIDSetLevelDB.initialize();
+		PersistentMuidSetLevelDB.initialize();
 		NodeFactory.initialize(storageDir);
 	}
 
@@ -224,10 +224,30 @@ public class LikeService implements LikeGraphApi {
 		}
 	}
 
+	/**
+	 * 
+	 * @param from
+	 *            the muid of the node following to
+	 * @param to
+	 *            the muid of the node being followed by from
+	 * @return true if from follows to
+	 */
 	Vote follows(long from, long to) {
+
 		/*
 		 * TODO: To be implemented
 		 */
 		return null;
+	}
+
+	/**
+	 * 
+	 * @param muid
+	 *            the muid of the searched node
+	 * @return <true> if the given muid is stored in the database. This is only
+	 *         the case if at least on edge exists going from or to this node
+	 */
+	public boolean nodeExists(final long muid) {
+		return NodeFactory.nodeExists(muid);
 	}
 }

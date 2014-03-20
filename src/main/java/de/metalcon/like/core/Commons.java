@@ -20,7 +20,7 @@ class Commons {
 
     private final Vote likeType;
 
-    private PersistentMUIDArrayMapLevelDB persistentCommonsMap = null;
+    private PersistentMuidMapLevelDB persistentCommonsMap = null;
 
     /**
      * 
@@ -32,7 +32,7 @@ class Commons {
             final Vote likeType) {
         this.node = node;
         persistentCommonsMap =
-                new PersistentMUIDArrayMapLevelDB(node.getUUID());
+                new PersistentMuidMapLevelDB(node.getUUID());
         this.likeType = likeType;
     }
 

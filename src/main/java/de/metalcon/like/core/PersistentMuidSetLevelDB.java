@@ -3,10 +3,12 @@ package de.metalcon.like.core;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import de.metalcon.exceptions.MetalconRuntimeException;
+
 /**
  * @author Jonas Kunze
  */
-public class PersistentUUIDSetLevelDB implements Iterable<Long> {
+public class PersistentMuidSetLevelDB implements Iterable<Long> {
 	private static LevelDBHandler db;
 
 	private final long ID;
@@ -15,11 +17,11 @@ public class PersistentUUIDSetLevelDB implements Iterable<Long> {
 		db = new LevelDBHandler("PersistentUUIDSetLevelDB");
 	}
 
-	public PersistentUUIDSetLevelDB(final long ID) {
+	public PersistentMuidSetLevelDB(final long ID) {
 		this.ID = ID;
 	}
 
-	public PersistentUUIDSetLevelDB(final String ID) {
+	public PersistentMuidSetLevelDB(final String ID) {
 		this.ID = ID.hashCode();
 	}
 
@@ -35,6 +37,7 @@ public class PersistentUUIDSetLevelDB implements Iterable<Long> {
 	 */
 	public void delete() {
 		// TODO To be implemented
+		throw new MetalconRuntimeException("Not yet implemented");
 	}
 
 	/**

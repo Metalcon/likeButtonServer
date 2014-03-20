@@ -116,7 +116,7 @@ public class Main {
 
 	public static long updateAllNodes() {
 		long start = System.nanoTime();
-		for (long uuid : NodeFactory.getAllNodeUUIDs()) {
+		for (long uuid : NodeFactory.getAllNodeMuids()) {
 			Node n = NodeFactory.getNode(uuid);
 			n.updateCommons();
 		}

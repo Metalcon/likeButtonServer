@@ -3,116 +3,134 @@ package de.metalcon.like.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import junit.framework.Assert;
 
 import org.junit.Test;
 
 public class PutEdgeTest extends AbstractLikeServiceTest {
 
-    @Test
-    public void testCreateNodeWhileCreatingEdges() {
-        assertNull(likeService.getLikedInNodes(1));
-        assertNull(likeService.getLikedInNodes(2));
-        assertNull(likeService.getLikedOutNodes(1));
-        assertNull(likeService.getLikedOutNodes(2));
+	@Test
+	public void testCreateNodeWhileCreatingEdges() {
+		assertNull(likeService.getLikedInNodes(1));
+		assertNull(likeService.getLikedInNodes(2));
+		assertNull(likeService.getLikedOutNodes(1));
+		assertNull(likeService.getLikedOutNodes(2));
 
-        likeService.putEdge(1, 2, Vote.UP);
-        assertNotNull(likeService.getLikedOutNodes(1));
-        assertNotNull(likeService.getLikedInNodes(2));
+		likeService.putEdge(1, 2, Vote.UP);
+		assertNotNull(likeService.getLikedOutNodes(1));
+		assertNotNull(likeService.getLikedInNodes(2));
 
-        assertNull(likeService.getLikedOutNodes(2));
-        assertNull(likeService.getLikedInNodes(1));
-    }
+		/*
+		 * we've only created (1) -[:UP]-> (2) so (2) should not have any
+		 * outNode and (1) not any InNode
+		 */
+		assertNull(likeService.getLikedOutNodes(2));
+		assertNull(likeService.getLikedInNodes(1));
+	}
 
-    @Test
-    public void testNotExistentEdges() {
-        assertEquals(likeService.follows(1, 2), Vote.NEUTRAL);
+	@Test
+	public void testNodeCreation() {
+		Assert.assertFalse(likeService.nodeExists(1));
+		likeService.putEdge(1, 2, Vote.UP);
+		Assert.assertTrue(likeService.nodeExists(1));
+	}
 
-        likeService.putEdge(1, 2, Vote.DOWN);
-        assertEquals(likeService.follows(1, 2), equals(Vote.DOWN));
+	@Test
+	public void testNotExistentEdges() {
+		/*
+		 * Deletion means setting like to Vote.NEUTRAL
+		 */
+		assertNull(likeService.follows(1, 2));
 
-        likeService.putEdge(1, 2, Vote.UP);
-        assertEquals(likeService.follows(1, 2), equals(Vote.UP));
+		likeService.putEdge(1, 2, Vote.UP);
+		assertEquals(likeService.follows(1, 2), equals(Vote.UP));
 
-        likeService.putEdge(1, 2, Vote.NEUTRAL);
-        assertEquals(likeService.follows(1, 2), equals(Vote.NEUTRAL));
+		likeService.putEdge(1, 2, Vote.DOWN);
+		assertEquals(likeService.follows(1, 2), equals(Vote.DOWN));
 
-    }
+		likeService.deleteEdge(1, 2);
+		assertNull(likeService.follows(1, 2));
 
-    @Test
-    public void testChangeVote() {
-        assertNull(likeService.getLikedInNodes(1));
-        assertNull(likeService.getLikedInNodes(2));
-        assertNull(likeService.getLikedOutNodes(1));
-        assertNull(likeService.getLikedOutNodes(2));
+	}
 
-        likeService.putEdge(1, 2, Vote.UP);
-        assertNotNull(likeService.getLikedOutNodes(1));
-        assertNotNull(likeService.getLikedInNodes(2));
-        assertNull(likeService.getDislikedOutNodes(1));
-        assertNull(likeService.getDislikedInNodes(2));
+	@Test
+	public void testChangeVote() {
+		assertNull(likeService.getLikedInNodes(1));
+		assertNull(likeService.getLikedInNodes(2));
+		assertNull(likeService.getLikedOutNodes(1));
+		assertNull(likeService.getLikedOutNodes(2));
 
-        assertNull(likeService.getLikedOutNodes(2));
-        assertNull(likeService.getLikedInNodes(1));
-        likeService.putEdge(1, 2, Vote.DOWN);
-        assertNull(likeService.getLikedOutNodes(1));
-        assertNull(likeService.getLikedInNodes(2));
-        assertNotNull(likeService.getDislikedOutNodes(1));
-        assertNotNull(likeService.getDislikedInNodes(2));
+		likeService.putEdge(1, 2, Vote.UP);
+		assertNotNull(likeService.getLikedOutNodes(1));
+		assertNotNull(likeService.getLikedInNodes(2));
+		assertNull(likeService.getDislikedOutNodes(1));
+		assertNull(likeService.getDislikedInNodes(2));
 
-        assertNull(likeService.getLikedOutNodes(2));
-        assertNull(likeService.getLikedInNodes(1));
+		assertNull(likeService.getLikedOutNodes(2));
+		assertNull(likeService.getLikedInNodes(1));
+		likeService.putEdge(1, 2, Vote.DOWN);
+		// Return null instead of long[]{0,0,0,0}
+		assertNull(likeService.getLikedOutNodes(1));
+		assertNull(likeService.getLikedInNodes(2));
+		assertNotNull(likeService.getDislikedOutNodes(1));
+		assertNotNull(likeService.getDislikedInNodes(2));
 
-        // even if it is used with delete edge the array now consits of several elements with id 0
-        likeService.putEdge(1, 2, Vote.NEUTRAL);
-        assertNull(likeService.getLikedInNodes(1));
-        assertNull(likeService.getLikedInNodes(2));
-        assertNull(likeService.getLikedOutNodes(1));
-        assertNull(likeService.getLikedOutNodes(2));
-    }
+		assertNull(likeService.getLikedOutNodes(2));
+		assertNull(likeService.getLikedInNodes(1));
 
-    @Test
-    public void testPutMultiedge() {
-        assertNull(likeService.getLikedInNodes(1));
-        assertNull(likeService.getLikedInNodes(2));
-        assertNull(likeService.getLikedInNodes(3));
-        assertNull(likeService.getLikedInNodes(4));
-        assertNull(likeService.getLikedOutNodes(1));
-        assertNull(likeService.getLikedOutNodes(2));
-        assertNull(likeService.getLikedOutNodes(3));
-        assertNull(likeService.getLikedOutNodes(4));
+		// even if it is used with delete edge the array now consits of several
+		// elements with id 0
+		likeService.putEdge(1, 2, Vote.NEUTRAL);
+		assertNull(likeService.getLikedInNodes(1));
+		assertNull(likeService.getLikedInNodes(2));
+		assertNull(likeService.getLikedOutNodes(1));
+		assertNull(likeService.getLikedOutNodes(2));
+	}
 
-        likeService.putEdge(1, 2, Vote.UP);
-        likeService.putEdge(1, 3, Vote.UP);
-        likeService.putEdge(2, 3, Vote.UP);
+	@Test
+	public void testPutMultiedge() {
+		assertNull(likeService.getLikedInNodes(1));
+		assertNull(likeService.getLikedInNodes(2));
+		assertNull(likeService.getLikedInNodes(3));
+		assertNull(likeService.getLikedInNodes(4));
+		assertNull(likeService.getLikedOutNodes(1));
+		assertNull(likeService.getLikedOutNodes(2));
+		assertNull(likeService.getLikedOutNodes(3));
+		assertNull(likeService.getLikedOutNodes(4));
 
-        //TODO: length is expected to be 2 in this case. no zeros should be atached to the array
-        System.out.println(likeService.getLikedInNodes(3).length);
-        for (long l : likeService.getLikedInNodes(3)) {
-            System.out.println(l);
-        }
+		likeService.putEdge(1, 2, Vote.UP);
+		likeService.putEdge(1, 3, Vote.UP);
+		likeService.putEdge(2, 3, Vote.UP);
 
-        assertEquals(likeService.getLikedInNodes(3).length, 2);
-        assertEquals(likeService.getLikedOutNodes(2).length, 2);
+		// TODO: length is expected to be 2 in this case. no zeros should be
+		// atached to the array
+		System.out.println(likeService.getLikedInNodes(3).length);
+		for (long l : likeService.getLikedInNodes(3)) {
+			System.out.println(l);
+		}
 
-        likeService.putEdge(1, 3, Vote.DOWN);
-        assertEquals(likeService.getLikedInNodes(3).length, 1);
-        assertEquals(likeService.getLikedOutNodes(2).length, 1);
+		assertEquals(likeService.getLikedInNodes(3).length, 2);
+		assertEquals(likeService.getLikedOutNodes(2).length, 2);
 
-        assertEquals(likeService.getDislikedInNodes(3).length, 1);
-        assertEquals(likeService.getDislikedOutNodes(1).length, 1);
+		likeService.putEdge(1, 3, Vote.DOWN);
+		assertEquals(likeService.getLikedInNodes(3).length, 1);
+		assertEquals(likeService.getLikedOutNodes(2).length, 1);
 
-        System.out.println(likeService.getLikedInNodes(3).length);
-        for (long l : likeService.getLikedInNodes(3)) {
-            System.out.println(l);
-        }
+		assertEquals(likeService.getDislikedInNodes(3).length, 1);
+		assertEquals(likeService.getDislikedOutNodes(1).length, 1);
 
-        System.out.println(likeService.getDislikedInNodes(3).length);
-        for (long l : likeService.getDislikedInNodes(3)) {
-            System.out.println(l);
-        }
+		System.out.println(likeService.getLikedInNodes(3).length);
+		for (long l : likeService.getLikedInNodes(3)) {
+			System.out.println(l);
+		}
 
-        assertEquals(likeService.getDislikedInNodes(3)[0], 1);
-        assertEquals(likeService.getDislikedInNodes(1)[0], 3);
+		System.out.println(likeService.getDislikedInNodes(3).length);
+		for (long l : likeService.getDislikedInNodes(3)) {
+			System.out.println(l);
+		}
 
-    }
+		assertEquals(likeService.getDislikedInNodes(3)[0], 1);
+		assertEquals(likeService.getDislikedInNodes(1)[0], 3);
+
+	}
 }

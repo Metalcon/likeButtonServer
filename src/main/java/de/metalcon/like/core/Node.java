@@ -32,16 +32,16 @@ public class Node {
     /*
      * All out nodes liked/diskliked by this node
      */
-    private final PersistentUUIDSetLevelDB likedOut;
+    private final PersistentMuidSetLevelDB likedOut;
 
-    private final PersistentUUIDSetLevelDB dislikedOut;
+    private final PersistentMuidSetLevelDB dislikedOut;
 
     /*
      * All out nodes liking/disliking this node
      */
-    private final PersistentUUIDSetLevelDB likedIn;
+    private final PersistentMuidSetLevelDB likedIn;
 
-    private final PersistentUUIDSetLevelDB dislikedIn;
+    private final PersistentMuidSetLevelDB dislikedIn;
 
     private final PersistentLikeHistory likeHistory;
 
@@ -83,10 +83,10 @@ public class Node {
         // System.exit(1);
         // }
 
-        likedOut = new PersistentUUIDSetLevelDB(UUID + "likedOut");
-        likedIn = new PersistentUUIDSetLevelDB(UUID + "likedIn");
-        dislikedOut = new PersistentUUIDSetLevelDB(UUID + "dislikedOut");
-        dislikedIn = new PersistentUUIDSetLevelDB(UUID + "dislikedIn");
+        likedOut = new PersistentMuidSetLevelDB(UUID + "likedOut");
+        likedIn = new PersistentMuidSetLevelDB(UUID + "likedIn");
+        dislikedOut = new PersistentMuidSetLevelDB(UUID + "dislikedOut");
+        dislikedIn = new PersistentMuidSetLevelDB(UUID + "dislikedIn");
 
         likeHistory = new PersistentLikeHistory(UUID);
     }
@@ -384,7 +384,7 @@ public class Node {
         return null;
     }
 
-    public PersistentUUIDSetLevelDB getLikedOutSet(final Vote vote) {
+    public PersistentMuidSetLevelDB getLikedOutSet(final Vote vote) {
         if (vote == Vote.UP) {
             return likedOut;
         }
