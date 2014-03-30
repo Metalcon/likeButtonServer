@@ -96,7 +96,11 @@ public class LikeService implements LikeGraphApi {
 		if (n == null) {
 			return null;
 		}
-		return n.getLikes(directionOut, vote).toArray();
+		long[] result = n.getLikes(directionOut, vote).toArray();
+		if (result == null || result.length == 0) {
+			return null;
+		}
+		return result;
 	}
 
 	/**

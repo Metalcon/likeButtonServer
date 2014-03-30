@@ -65,6 +65,7 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 		assertNull(likeService.getLikes(2, true, Vote.UP));
 
 		likeService.putEdge(1, 2, Vote.UP);
+
 		assertNotNull(likeService.getLikes(1, true, Vote.UP));
 		assertNotNull(likeService.getLikes(2, false, Vote.UP));
 		assertNull(likeService.getLikes(1, true, Vote.DOWN));
@@ -72,19 +73,17 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 
 		assertNull(likeService.getLikes(2, true, Vote.UP));
 		assertNull(likeService.getLikes(1, false, Vote.UP));
+
 		likeService.putEdge(1, 2, Vote.DOWN);
 
-		// Return null instead of long[]{0,0,0,0}
 		assertNull(likeService.getLikes(1, true, Vote.UP));
 		assertNull(likeService.getLikes(2, false, Vote.UP));
 		assertNotNull(likeService.getLikes(1, true, Vote.DOWN));
-		assertNotNull(likeService.getLikes(2, true, Vote.DOWN));
+		assertNotNull(likeService.getLikes(2, false, Vote.DOWN));
 
 		assertNull(likeService.getLikes(2, true, Vote.UP));
 		assertNull(likeService.getLikes(1, false, Vote.UP));
 
-		// even if it is used with delete edge the array now consits of several
-		// elements with id 0
 		likeService.putEdge(1, 2, Vote.NEUTRAL);
 		assertNull(likeService.getLikes(1, false, Vote.UP));
 		assertNull(likeService.getLikes(2, false, Vote.UP));
@@ -115,7 +114,7 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 		}
 
 		assertEquals(likeService.getLikes(3, false, Vote.UP).length, 2);
-		assertEquals(likeService.getLikes(2, true, Vote.UP).length, 2);
+		assertEquals(likeService.getLikes(2, true, Vote.UP).length, 1);
 
 		likeService.putEdge(1, 3, Vote.DOWN);
 		assertEquals(likeService.getLikes(3, false, Vote.UP).length, 1);
@@ -135,7 +134,7 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 		}
 
 		assertEquals(likeService.getLikes(3, false, Vote.DOWN)[0], 1);
-		assertEquals(likeService.getLikes(1, false, Vote.DOWN)[0], 3);
+		assertEquals(likeService.getLikes(1, true, Vote.DOWN)[0], 3);
 
 	}
 }

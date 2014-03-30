@@ -169,6 +169,7 @@ public class LevelDBHandler {
 			}
 			elementPointer++;
 		}
+		
 		/*
 		 * Element has been found
 		 */
