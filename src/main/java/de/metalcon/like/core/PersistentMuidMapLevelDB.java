@@ -5,12 +5,10 @@ import java.util.HashMap;
 /**
  * @author Jonas Kunze
  */
-public class PersistentMUIDArrayMapLevelDB {
-	private static final int InitialArrayLength = 4;
-
+public class PersistentMuidMapLevelDB {
 	LevelDBHandler dbHandler;
 
-	public PersistentMUIDArrayMapLevelDB(final long keyPrefix) {
+	public PersistentMuidMapLevelDB(final long keyPrefix) {
 		dbHandler = new LevelDBHandler(keyPrefix);
 	}
 
@@ -36,7 +34,7 @@ public class PersistentMUIDArrayMapLevelDB {
 	 * @param valueUUID
 	 */
 	public void append(final long keyUUID, final long valueUUID) {
-		dbHandler.setAdd(keyUUID, valueUUID);
+		dbHandler.setAdd(dbHandler.generateKey(keyUUID), valueUUID);
 	}
 
 	/**
@@ -49,7 +47,7 @@ public class PersistentMUIDArrayMapLevelDB {
 	 * @see HashMap#get(Object)
 	 */
 	public long[] get(final long keyUUID) {
-		return dbHandler.getLongs(keyUUID);
+		return dbHandler.getLongs(dbHandler.generateKey(keyUUID));
 	}
 
 	/**

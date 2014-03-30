@@ -3,6 +3,7 @@ package de.metalcon.like.api;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.HashSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,9 +33,13 @@ public abstract class AbstractLikeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        likeService.clear();
+        if (likeService != null) {
+            likeService.clearDataBase("Yes I am");
+            System.out.println("cleared");
+        }
         try {
             likeService = new LikeService(TEST_FOLDER);
+            System.out.println("created new");
         } catch (Exception e) {
             e.printStackTrace();
             fail("cannot reset data base for new tests");
@@ -43,37 +48,41 @@ public abstract class AbstractLikeServiceTest {
 
     @After
     public void tearDown() throws Exception {
-
+        likeService.clearDataBase("Yes I am");
     }
 
-    //    @Test
-    //    public void testDeleteEdge() {
-    //        fail("Not yet implemented");
-    //    }
     //
-    //    @Test
-    //    public void testGetLikedInNodes() {
-    //        fail("Not yet implemented");
-    //    }
+    // @Test
+    // public void testGetLikedInNodes() {
+    // fail("Not yet implemented");
+    // }
     //
-    //    @Test
-    //    public void testGetLikedOutNodes() {
-    //        fail("Not yet implemented");
-    //    }
+    // @Test
+    // public void testGetLikedOutNodes() {
+    // fail("Not yet implemented");
+    // }
     //
-    //    @Test
-    //    public void testGetDislikedInNodes() {
-    //        fail("Not yet implemented");
-    //    }
+    // @Test
+    // public void testGetDislikedInNodes() {
+    // fail("Not yet implemented");
+    // }
     //
-    //    @Test
-    //    public void testGetDislikedOutNodes() {
-    //        fail("Not yet implemented");
-    //    }
+    // @Test
+    // public void testGetDislikedOutNodes() {
+    // fail("Not yet implemented");
+    // }
     //
-    //    @Test
-    //    public void testGetLikedLikes() {
-    //        fail("Not yet implemented");
-    //    }
+    // @Test
+    // public void testGetLikedLikes() {
+    // fail("Not yet implemented");
+    // }
+
+    protected HashSet<Long> convertArrayToHashSet(long[] array) {
+        HashSet<Long> result = new HashSet<Long>();
+        for (long l : array) {
+            result.add(l);
+        }
+        return result;
+    }
 
 }

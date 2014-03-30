@@ -70,7 +70,7 @@ public class Main {
 		// long nodeNum = NodeFactory.getAllNodeUUIDs().length;
 		// System.out.println("Importing " + nodeNum + " users took "
 		// + (int) (time / 1E9f) + " s (" + time / 1000 / nodeNum
-		// + " µs per node)");
+		// + " ��s per node)");
 		//
 		// /*
 		// * Import Albums and Bands
@@ -87,7 +87,7 @@ public class Main {
 		// time = updateAllNodes();
 		// System.out.println("Updating " + NodeFactory.getAllNodeUUIDs().length
 		// + " nodes took " + (int) (time / 1E9f) + " s (" + time / 1000
-		// / NodeFactory.getAllNodeUUIDs().length + " µs per node)");
+		// / NodeFactory.getAllNodeUUIDs().length + " ��s per node)");
 		//
 		// /*
 		// * Process some getInCommon calls
@@ -109,14 +109,14 @@ public class Main {
 		// System.out.println("Generating commons for " + runs
 		// + " node pairs took " + (int) (time / 1E6f) + " ms finding "
 		// + found + " non empty lists (" + time / 1000 / runs
-		// + " µs per node)");
+		// + " ��s per node)");
 		//
 		// testInCommons(graph, 1, 2, true);
 	}
 
 	public static long updateAllNodes() {
 		long start = System.nanoTime();
-		for (long uuid : NodeFactory.getAllNodeUUIDs()) {
+		for (long uuid : NodeFactory.getAllNodeMuids()) {
 			Node n = NodeFactory.getNode(uuid);
 			n.updateCommons();
 		}
@@ -124,7 +124,7 @@ public class Main {
 	}
 
 	public static int testInCommons(LikeGraphApi graph, long from, long to,
-			boolean verbose) {
+			boolean verbose) throws IOException {
 		long start = System.nanoTime();
 		long[] commons = graph.getCommonNodes(from, to);
 		long end = System.nanoTime();

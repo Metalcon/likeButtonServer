@@ -1,6 +1,6 @@
 package de.metalcon.like.core;
 
-import static org.fusesource.leveldbjni.JniDBFactory.factory;
+import static org.fusesource.leveldbjni.JniDBFactory.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,16 +8,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 
 import de.metalcon.exceptions.MetalconException;
+import de.metalcon.exceptions.MetalconRuntimeException;
 
 public class LevelDBHandler {
 	private static DB db = null;
-
-	private static int InitialArrayLength = 4;
 
 	private final byte[] keyPrefix;
 
@@ -49,12 +50,15 @@ public class LevelDBHandler {
 				throw new MetalconException("Unable to instanciate levelDB on "
 						+ DBPath);
 			}
+		} else {
+			throw new MetalconException(
+					"LevelDBHandler has already been Initialized");
 		}
 		DBPath_ = DBPath;
 	}
 
 	public LevelDBHandler(final long keyPrefix) {
-		this.keyPrefix = new byte[16];
+		this.keyPrefix = new byte[8];
 		this.keyPrefix[0] = (byte) (keyPrefix >> 56);
 		this.keyPrefix[1] = (byte) (keyPrefix >> 48);
 		this.keyPrefix[2] = (byte) (keyPrefix >> 40);
@@ -66,22 +70,15 @@ public class LevelDBHandler {
 	}
 
 	public LevelDBHandler(final String keyPrefix) {
-		long hash = keyPrefix.hashCode() + 0xFFFFFFFFL * keyPrefix.hashCode();
-		this.keyPrefix = new byte[16];
-		this.keyPrefix[0] = (byte) (hash >> 56);
-		this.keyPrefix[1] = (byte) (hash >> 48);
-		this.keyPrefix[2] = (byte) (hash >> 40);
-		this.keyPrefix[3] = (byte) (hash >> 32);
-		this.keyPrefix[4] = (byte) (hash >> 24);
-		this.keyPrefix[5] = (byte) (hash >> 16);
-		this.keyPrefix[6] = (byte) (hash >> 8);
-		this.keyPrefix[7] = (byte) (hash);
+		this(keyPrefix.hashCode() + 0xFFFFFFFFL * keyPrefix.hashCode());
 	}
 
 	public static void clearDataBase(String areYouSure) throws IOException {
-		if (areYouSure.equals("Yes I am")) {
+		if (areYouSure.equals("Yes I am") && db != null) {
 			db.close();
+			System.out.println("Deleting LevelDB directory " + DBPath_);
 			IOHelper.deleteFile(new File(DBPath_));
+			db = null;
 		}
 	}
 
@@ -121,43 +118,26 @@ public class LevelDBHandler {
 	 * @param value
 	 *            value to be added to the array
 	 */
-	public void setAdd(final long key, final long value) {
+	public void setAdd(final byte[] key, final long value) {
 		long[] valueArray = getLongs(key);
 
-		int lastEmptyPointer = 0;
 		if (valueArray == null) {
-			valueArray = new long[InitialArrayLength];
+			valueArray = new long[1];
 		} else {
-
 			/*
-			 * Seek the last 0 element or return if addUUID is already in the
-			 * array
-			 * 
-			 * If neither any 0-element nor addUUID have been found
-			 * lastEmptyPointer will be commons.length after this loop
+			 * Check if the long is already stored
 			 */
-			while (lastEmptyPointer != valueArray.length) {
-				long current = valueArray[lastEmptyPointer];
+			for (long current : valueArray) {
 				if (current == value) {
 					return;
 				}
-				if (current == 0) {
-					break;
-				}
-				lastEmptyPointer++;
 			}
-			/*
-			 * No empty position found. Array has to be extended
-			 */
-			if (lastEmptyPointer == valueArray.length) {
-				int newLength = 2 * valueArray.length + 1;
-				int oldLength = valueArray.length;
-				long[] tmp = new long[newLength];
-				System.arraycopy(valueArray, 0, tmp, 0, oldLength);
-				valueArray = tmp;
-			}
+
+			long[] tmp = new long[valueArray.length + 1];
+			System.arraycopy(valueArray, 0, tmp, 0, valueArray.length);
+			valueArray = tmp;
 		}
-		valueArray[lastEmptyPointer] = value;
+		valueArray[valueArray.length - 1] = value;
 		put(key, valueArray);
 	}
 
@@ -170,7 +150,7 @@ public class LevelDBHandler {
 	 * @param value
 	 *            value to be removed from the array
 	 */
-	public void removeFromSet(final long key, final long value) {
+	public void removeFromSet(final byte[] key, final long value) {
 		long[] valueArray = getLongs(key);
 
 		if (valueArray == null) {
@@ -180,10 +160,7 @@ public class LevelDBHandler {
 		int elementPointer = 0;
 
 		/*
-		 * Seek the last 0 element or return if addUUID is already in the array
-		 * 
-		 * If neither any 0-element nor addUUID have been found lastEmptyPointer
-		 * will be commons.length after this loop
+		 * Seek the element
 		 */
 		while (elementPointer != valueArray.length) {
 			long current = valueArray[elementPointer];
@@ -192,14 +169,21 @@ public class LevelDBHandler {
 			}
 			elementPointer++;
 		}
+		
 		/*
-		 * No empty position found. Array has to be extended
+		 * Element has been found
 		 */
 		if (elementPointer != valueArray.length) {
-			System.arraycopy(valueArray, elementPointer + 1, valueArray,
+			long[] tmp = new long[valueArray.length - 1];
+
+			System.arraycopy(valueArray, 0, tmp, 0, elementPointer);
+			System.arraycopy(valueArray, elementPointer + 1, tmp,
 					elementPointer, valueArray.length - elementPointer - 1);
+
+			// System.arraycopy(valueArray, elementPointer + 1, valueArray,
+			// elementPointer, valueArray.length - elementPointer - 1);
+			put(key, tmp);
 		}
-		put(key, valueArray);
 	}
 
 	/**
@@ -211,8 +195,8 @@ public class LevelDBHandler {
 	 * @param value
 	 *            value to be associated with the specified key
 	 */
-	public void put(final long key, final long[] value) {
-		db.put(generateKey(key), Serialize(value));
+	public void put(final byte[] key, final long[] value) {
+		db.put(key, Serialize(value));
 	}
 
 	/**
@@ -245,8 +229,8 @@ public class LevelDBHandler {
 	 * @return The long[] to which the specified key is mapped, or null if the
 	 *         DB contains no mapping for the key.
 	 */
-	public long[] getLongs(final long key) {
-		byte[] bytes = db.get(generateKey(key));
+	public long[] getLongs(final byte[] key) {
+		byte[] bytes = db.get(key);
 		if (bytes == null) {
 			return null;
 		}
@@ -281,7 +265,7 @@ public class LevelDBHandler {
 	 * @param keyUUID
 	 * @return
 	 */
-	public boolean setContainsElement(final long keyUUID, final long valueUUID) {
+	public boolean setContainsElement(final byte[] keyUUID, final long valueUUID) {
 		if (getLongs(keyUUID) == null) {
 			return false;
 		}
@@ -293,12 +277,13 @@ public class LevelDBHandler {
 		return false;
 	}
 
-	private byte[] generateKey(final String keySuffix) {
+	public byte[] generateKey(final String keySuffix) {
 		return generateKey(keySuffix.hashCode());
 	}
 
-	private byte[] generateKey(final long keySuffix) {
-		byte[] key = keyPrefix;
+	public byte[] generateKey(final long keySuffix) {
+		byte[] key = new byte[16];
+		System.arraycopy(keyPrefix, 0, key, 0, 8);
 		key[8] = (byte) (keySuffix >> 56);
 		key[9] = (byte) (keySuffix >> 48);
 		key[10] = (byte) (keySuffix >> 40);
@@ -334,15 +319,28 @@ public class LevelDBHandler {
 				ByteArrayInputStream bios = new ByteArrayInputStream(str);
 				ObjectInputStream ois = new ObjectInputStream(bios);
 				out = ois.readObject();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
+			} catch (Exception e) {
+				throw new MetalconRuntimeException(e.getMessage());
 			}
 		}
 		return out;
 	}
 
+	public static void printDB() {
+		if (db == null) {
+			return;
+		}
+		DBIterator iterator = db.iterator();
+		for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+			System.out.println(asString(iterator.peekNext().getKey()) + ":");
+			System.out.println("\t"
+					+ Arrays.toString((long[]) DeSerialize(iterator.peekNext()
+							.getValue())));
+		}
+		try {
+			iterator.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
