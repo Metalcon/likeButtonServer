@@ -48,7 +48,7 @@ public class NodeFactory {
 			throw new RuntimeException(
 					"NodeFactory has already been initialized.");
 		}
-		AllNodes = new PersistentMuidSetLevelDB(storDir);
+		AllNodes = new PersistentMuidSetLevelDB("AllNodes");
 		System.out.println("Finished reading " + storDir + ":");
 		System.out.println(AllNodes.size() + " muids");
 	}

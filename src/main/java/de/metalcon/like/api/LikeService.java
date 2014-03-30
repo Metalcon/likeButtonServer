@@ -21,8 +21,6 @@ import de.metalcon.like.core.PersistentMuidSetLevelDB;
  */
 public class LikeService implements LikeGraphApi {
 
-	private int edgeNum = 0;
-
 	public LikeService(final String storageDir) throws MetalconException {
 		File f = new File(storageDir);
 
@@ -57,16 +55,8 @@ public class LikeService implements LikeGraphApi {
 				f = NodeFactory.createNewNode(from);
 			}
 
-			Node t = NodeFactory.getNode(to);
-			if (t == null) {
-				t = NodeFactory.createNewNode(to);
-			}
-
-			/*
-			 * TODO: Here we need to pass the current timestamp instead of
-			 * edgeNum++
-			 */
-			f.addLike(new Like(t.getUUID(), edgeNum++, vote));
+			f.addLike(new Like(to, (int) (System.currentTimeMillis() / 1000),
+					vote));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -74,10 +64,10 @@ public class LikeService implements LikeGraphApi {
 	}
 
 	/**
-	 * Delete the friendship between from and to
+	 * Delete the friendship between from and to z@throws IOException
 	 */
 	@Override
-	public void deleteEdge(final long from, final long to) {
+	public void deleteEdge(final long from, final long to) throws IOException {
 		final Node f = NodeFactory.getNode(from);
 		if (f == null) {
 			return;
@@ -100,63 +90,13 @@ public class LikeService implements LikeGraphApi {
 	 * @return The list of nodes liking the node with the given MUID
 	 */
 	@Override
-	public long[] getLikedInNodes(final long nodeMUID) {
+	public long[] getLikes(final long nodeMUID, final boolean directionOut,
+			final Vote vote) {
 		final Node n = NodeFactory.getNode(nodeMUID);
 		if (n == null) {
 			return null;
 		}
-		return n.getLikeInNodes();
-	}
-
-	/**
-	 * Returns a list of MUIDs of nodes liked by the node with the MUID
-	 * 'nodeMUID' or null if the requested node does not exist
-	 * 
-	 * @param nodeMUID
-	 *            The requested node
-	 * @return The list of nodes liked by the node with the given MUID
-	 */
-	@Override
-	public long[] getLikedOutNodes(final long nodeMUID) {
-		final Node n = NodeFactory.getNode(nodeMUID);
-		if (n == null) {
-			return null;
-		}
-		return n.getOutNodes(Vote.UP);
-	}
-
-	/**
-	 * Returns a list of MUIDs of nodes disliking the node with the MUID
-	 * 'nodeMUID' or null if the requested node does not exist
-	 * 
-	 * @param nodeMUID
-	 *            The requested node
-	 * @return The list of nodes disliking the node with the given MUID
-	 */
-	@Override
-	public long[] getDislikedInNodes(final long nodeMUID) {
-		final Node n = NodeFactory.getNode(nodeMUID);
-		if (n == null) {
-			return null;
-		}
-		return n.getDislikeInNodes();
-	}
-
-	/**
-	 * Returns a list of MUIDs of nodes disliked by the node with the MUID
-	 * 'nodeMUID' or null if the requested node does not exist
-	 * 
-	 * @param nodeMUID
-	 *            The requested node
-	 * @return The list of nodes liked by the node with the given MUID
-	 */
-	@Override
-	public long[] getDislikedOutNodes(final long nodeMUID) {
-		final Node n = NodeFactory.getNode(nodeMUID);
-		if (n == null) {
-			return null;
-		}
-		return n.getOutNodes(Vote.DOWN);
+		return n.getLikes(directionOut, vote).toArray();
 	}
 
 	/**
@@ -180,7 +120,7 @@ public class LikeService implements LikeGraphApi {
 		/*
 		 * Iterate through all nodes liked by n
 		 */
-		for (long likedMUID : n.getOutNodes(Vote.UP)) {
+		for (long likedMUID : n.getLikes(true, Vote.UP)) {
 			if (likedMUID == 0) {
 				break;
 			}
@@ -190,7 +130,7 @@ public class LikeService implements LikeGraphApi {
 			 * nodes to the set
 			 */
 			final Node likedNode = NodeFactory.getNode(likedMUID);
-			for (long likedlikedMUID : likedNode.getOutNodes(Vote.UP)) {
+			for (long likedlikedMUID : likedNode.getLikes(true, Vote.UP)) {
 				if (likedlikedMUID == 0) {
 					break;
 				}
@@ -233,10 +173,21 @@ public class LikeService implements LikeGraphApi {
 	 * @return true if from follows to
 	 */
 	Vote follows(long from, long to) {
+		final Node n = NodeFactory.getNode(from);
+		if (n == null) {
+			return null;
+		}
+		for (long l : n.getLikes(true, Vote.UP)) {
+			if (l == to) {
+				return Vote.UP;
+			}
+		}
 
-		/*
-		 * TODO: To be implemented
-		 */
+		for (long l : n.getLikes(true, Vote.DOWN)) {
+			if (l == to) {
+				return Vote.DOWN;
+			}
+		}
 		return null;
 	}
 

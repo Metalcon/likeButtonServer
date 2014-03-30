@@ -1,5 +1,6 @@
 package de.metalcon.like.core;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -11,18 +12,14 @@ import de.metalcon.exceptions.MetalconRuntimeException;
 public class PersistentMuidSetLevelDB implements Iterable<Long> {
 	private static LevelDBHandler db;
 
-	private final long ID;
+	private final byte[] ID;
 
 	public static void initialize() {
 		db = new LevelDBHandler("PersistentUUIDSetLevelDB");
 	}
 
-	public PersistentMuidSetLevelDB(final long ID) {
-		this.ID = ID;
-	}
-
 	public PersistentMuidSetLevelDB(final String ID) {
-		this.ID = ID.hashCode();
+		this.ID = db.generateKey(ID);
 	}
 
 	/**
@@ -88,6 +85,11 @@ public class PersistentMuidSetLevelDB implements Iterable<Long> {
 	public long size() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString(toArray());
 	}
 }
 
