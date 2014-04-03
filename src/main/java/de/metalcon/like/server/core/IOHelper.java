@@ -1,4 +1,4 @@
-package de.metalcon.like.core;
+package de.metalcon.like.server.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;

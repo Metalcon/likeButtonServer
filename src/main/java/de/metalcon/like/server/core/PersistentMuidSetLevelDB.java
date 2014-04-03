@@ -1,4 +1,4 @@
-package de.metalcon.like.core;
+package de.metalcon.like.server.core;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -82,9 +82,12 @@ public class PersistentMuidSetLevelDB implements Iterable<Long> {
 		return db.getLongs(ID);
 	}
 
-	public long size() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int size() {
+		long[] elements = toArray();
+		if (elements == null) {
+			return 0;
+		}
+		return elements.length;
 	}
 
 	@Override

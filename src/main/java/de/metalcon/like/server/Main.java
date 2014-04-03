@@ -1,15 +1,15 @@
-package de.metalcon.like;
+package de.metalcon.like.server;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
 import de.metalcon.exceptions.MetalconException;
-import de.metalcon.like.api.LikeGraphApi;
-import de.metalcon.like.api.LikeService;
-import de.metalcon.like.api.Vote;
-import de.metalcon.like.core.Node;
-import de.metalcon.like.core.NodeFactory;
+import de.metalcon.like.server.api.LikeGraphApi;
+import de.metalcon.like.server.api.LikeService;
+import de.metalcon.like.server.api.Vote;
+import de.metalcon.like.server.core.Node;
+import de.metalcon.like.server.core.NodeFactory;
 
 /**
  * Hello world!

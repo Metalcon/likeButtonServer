@@ -1,9 +1,11 @@
 /**
  * 
  */
-package de.metalcon.like.api;
+package de.metalcon.like.server.api;
 
 import java.io.IOException;
+
+import de.metalcon.like.api.Direction;
 
 /**
  * @author Rene Pickhardt
@@ -60,7 +62,7 @@ public interface LikeGraphApi {
 	 * @return The list of nodes (dis)liking the node or being (dis)liked by the
 	 *         node
 	 */
-	public long[] getLikes(final long nodeMUID, final boolean directionOut,
+	public long[] getLikes(final long nodeMUID, final Direction direction,
 			final Vote vote) throws IOException;
 
 }

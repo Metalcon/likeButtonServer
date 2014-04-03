@@ -1,4 +1,4 @@
-package de.metalcon.like.api;
+package de.metalcon.like.server.api;
 
 public enum Vote {
 	UP((byte) 1), DOWN((byte) 2), NEUTRAL((byte) 3);

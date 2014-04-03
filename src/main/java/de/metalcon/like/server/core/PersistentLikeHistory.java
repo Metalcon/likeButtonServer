@@ -1,4 +1,4 @@
-package de.metalcon.like.core;
+package de.metalcon.like.server.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import de.metalcon.domain.MuidConverter;
 import de.metalcon.exceptions.MetalconException;
-import de.metalcon.like.api.Vote;
+import de.metalcon.like.server.api.Vote;
 
 /**
  * @author Jonas Kunze

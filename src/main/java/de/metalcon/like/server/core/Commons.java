@@ -1,6 +1,6 @@
-package de.metalcon.like.core;
+package de.metalcon.like.server.core;
 
-import de.metalcon.like.api.Vote;
+import de.metalcon.like.server.api.Vote;
 
 /**
  * A class that is member of each startNode. It contains a map where key is the
@@ -76,7 +76,7 @@ class Commons {
 		/*
 		 * Update all outgoing nodes
 		 */
-		final long[] outNodes = node.getLikes(true, Vote.UP).toArray();
+		final long[] outNodes = node.getLikesOut(Vote.UP).toArray();
 		if (outNodes != null) {
 			for (long friendUUID : outNodes) {
 				if (friendUUID == 0) {
@@ -152,7 +152,7 @@ class Commons {
 				 * compute the cross-section between node.getLikedNodes() and
 				 * friend.getLikedNodes()
 				 */
-				if (node.getLikes(true, likeType).contains(like.getMUID())) {
+				if (node.getLikesOut(likeType).contains(like.getMUID())) {
 					persistentCommonsMap.append(friend.getUUID(),
 							like.getMUID());
 				}

@@ -1,4 +1,4 @@
-package de.metalcon.like.api;
+package de.metalcon.like.server.api;
 
 import static org.junit.Assert.fail;
 
@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import de.metalcon.like.server.api.LikeService;
 
 public abstract class AbstractLikeServiceTest {
 

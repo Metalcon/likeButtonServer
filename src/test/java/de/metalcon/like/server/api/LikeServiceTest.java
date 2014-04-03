@@ -1,10 +1,12 @@
-package de.metalcon.like.api;
+package de.metalcon.like.server.api;
 
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 
 import org.junit.Test;
+
+import de.metalcon.like.server.api.LikeService;
 
 public class LikeServiceTest extends AbstractLikeServiceTest {
 

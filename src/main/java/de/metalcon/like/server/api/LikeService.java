@@ -1,16 +1,18 @@
-package de.metalcon.like.api;
+package de.metalcon.like.server.api;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Set;
 
 import de.metalcon.exceptions.MetalconException;
-import de.metalcon.like.core.LevelDBHandler;
-import de.metalcon.like.core.Like;
-import de.metalcon.like.core.Node;
-import de.metalcon.like.core.NodeFactory;
-import de.metalcon.like.core.PersistentLikeHistory;
-import de.metalcon.like.core.PersistentMuidSetLevelDB;
+import de.metalcon.like.api.Direction;
+import de.metalcon.like.server.core.LevelDBHandler;
+import de.metalcon.like.server.core.Like;
+import de.metalcon.like.server.core.Node;
+import de.metalcon.like.server.core.NodeFactory;
+import de.metalcon.like.server.core.PersistentLikeHistory;
+import de.metalcon.like.server.core.PersistentMuidSetLevelDB;
 
 /**
  * TODO: implement Vote follows(long from, long to). This method should be O(1)
@@ -90,13 +92,45 @@ public class LikeService implements LikeGraphApi {
 	 * @return The list of nodes liking the node with the given MUID
 	 */
 	@Override
-	public long[] getLikes(final long nodeMUID, final boolean directionOut,
+	public long[] getLikes(final long nodeMUID, final Direction direction,
 			final Vote vote) {
 		final Node n = NodeFactory.getNode(nodeMUID);
 		if (n == null) {
 			return null;
 		}
-		long[] result = n.getLikes(directionOut, vote).toArray();
+
+		long[] result;
+		if (direction == Direction.INCOMING) {
+			result = n.getLikesIn(vote).toArray();
+		} else if (direction == Direction.OUTGOING) {
+			result = n.getLikesOut(vote).toArray();
+		} else {
+			long[] incoming = n.getLikesIn(vote).toArray();
+			long[] outgoing = n.getLikesOut(vote).toArray();
+			/*
+			 * Merge both lists
+			 */
+			if (incoming.length + outgoing.length != 0) {
+				/*
+				 * Remove duplicate elements
+				 */
+				Set<Long> set = new HashSet<Long>();
+				for (long l : incoming) {
+					set.add(l);
+				}
+				for (long l : outgoing) {
+					set.add(l);
+				}
+
+				result = new long[set.size()];
+				int pos = 0;
+				for (long l : set) {
+					result[pos++] = l;
+				}
+			} else {
+				return null;
+			}
+		}
 		if (result == null || result.length == 0) {
 			return null;
 		}
@@ -124,7 +158,7 @@ public class LikeService implements LikeGraphApi {
 		/*
 		 * Iterate through all nodes liked by n
 		 */
-		for (long likedMUID : n.getLikes(true, Vote.UP)) {
+		for (long likedMUID : n.getLikesOut(Vote.UP)) {
 			if (likedMUID == 0) {
 				break;
 			}
@@ -134,7 +168,7 @@ public class LikeService implements LikeGraphApi {
 			 * nodes to the set
 			 */
 			final Node likedNode = NodeFactory.getNode(likedMUID);
-			for (long likedlikedMUID : likedNode.getLikes(true, Vote.UP)) {
+			for (long likedlikedMUID : likedNode.getLikesOut(Vote.UP)) {
 				if (likedlikedMUID == 0) {
 					break;
 				}
@@ -176,18 +210,18 @@ public class LikeService implements LikeGraphApi {
 	 *            the muid of the node being followed by from
 	 * @return true if from follows to
 	 */
-	Vote follows(long from, long to) {
+	public Vote follows(long from, long to) {
 		final Node n = NodeFactory.getNode(from);
 		if (n == null) {
 			return null;
 		}
-		for (long l : n.getLikes(true, Vote.UP)) {
+		for (long l : n.getLikesOut(Vote.UP)) {
 			if (l == to) {
 				return Vote.UP;
 			}
 		}
 
-		for (long l : n.getLikes(true, Vote.DOWN)) {
+		for (long l : n.getLikesOut(Vote.DOWN)) {
 			if (l == to) {
 				return Vote.DOWN;
 			}

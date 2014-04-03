@@ -1,8 +1,8 @@
-package de.metalcon.like.core;
+package de.metalcon.like.server.core;
 
 import java.io.IOException;
 
-import de.metalcon.like.api.Vote;
+import de.metalcon.like.server.api.Vote;
 
 /**
  * @author Jonas Kunze
@@ -368,13 +368,22 @@ public class Node {
 	 *            instead. Vote.NEUTRAL will trigger a return null;
 	 * @return All MUIDs liked/disliked by this node, sorted by MUID
 	 */
-	public PersistentMuidSetLevelDB getLikes(boolean directionOut,
-			final Vote vote) {
+	public PersistentMuidSetLevelDB getLikesOut(final Vote vote) {
 		if (vote == Vote.UP) {
-			return directionOut ? likedOut : likedIn;
+			return likedOut;
 		}
 		if (vote == Vote.DOWN) {
-			return directionOut ? dislikedOut : dislikedIn;
+			return dislikedOut;
+		}
+		return null;
+	}
+
+	public PersistentMuidSetLevelDB getLikesIn(final Vote vote) {
+		if (vote == Vote.UP) {
+			return likedIn;
+		}
+		if (vote == Vote.DOWN) {
+			return dislikedIn;
 		}
 		return null;
 	}
