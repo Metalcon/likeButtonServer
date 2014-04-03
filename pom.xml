@@ -8,7 +8,7 @@
 
  <modelVersion>4.0.0</modelVersion>
  <artifactId>like-server</artifactId>
- <version>0.1.0-SNAPSHOT</version>
+ <version>0.2.0</version>
 
 
  <name>like</name>
@@ -18,12 +18,12 @@
   <dependency>
    <groupId>de.metalcon</groupId>
    <artifactId>muid</artifactId>
-   <version>0.1.0-SNAPSHOT</version>
+   <version>0.1.0</version>
   </dependency>
   <dependency>
    <groupId>de.metalcon</groupId>
    <artifactId>like-server-api</artifactId>
-   <version>0.0.1-SNAPSHOT</version>
+   <version>0.0.2</version>
   </dependency>
   <dependency>
    <groupId>org.fusesource.leveldbjni</groupId>
@@ -43,7 +43,7 @@
   <!-- Metalcon repository to resolve dependencies from -->
   <repository>
    <id>metalcon-depend</id>
-   <url>http://metalcon2.physik.uni-mainz.de:8080/mvn/</url>
+   <url>http://develop.metalcon.de:8080/mvn/</url>
   </repository>
  </repositories>
 </project>
