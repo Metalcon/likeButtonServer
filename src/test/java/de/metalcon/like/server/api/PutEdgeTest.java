@@ -16,15 +16,15 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 
 	@Test
 	public void testCreateNodeWhileCreatingEdges() {
-		assertNull(likeService.getLikes(1, Direction.INCOMING, Vote.UP));
-		assertNull(likeService.getLikes(2, Direction.INCOMING, Vote.UP));
-		assertNull(likeService.getLikes(1, Direction.OUTGOING, Vote.UP));
-		assertNull(likeService.getLikes(2, Direction.OUTGOING, Vote.UP));
+		assertNull(likeService.getLikes(1, Direction.BOTH, Vote.UP));
+		assertNull(likeService.getLikes(1, Direction.BOTH, Vote.UP));
 
 		likeService.putEdge(1, 2, Vote.UP);
 
-		assertNotNull(likeService.getLikes(1, Direction.OUTGOING, Vote.UP));
-		assertNotNull(likeService.getLikes(2, Direction.INCOMING, Vote.UP));
+		Assert.assertEquals(1,
+				likeService.getLikes(1, Direction.OUTGOING, Vote.UP).length);
+		Assert.assertEquals(1,
+				likeService.getLikes(2, Direction.INCOMING, Vote.UP).length);
 
 		/*
 		 * we've only created (1) -[:UP]-> (2) so (2) should not have any
@@ -32,6 +32,31 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
 		 */
 		assertNull(likeService.getLikes(2, Direction.OUTGOING, Vote.UP));
 		assertNull(likeService.getLikes(1, Direction.INCOMING, Vote.UP));
+
+		/*
+		 * Check Direction.BOTH
+		 */
+		Assert.assertEquals(1,
+				likeService.getLikes(1, Direction.BOTH, Vote.UP).length);
+		Assert.assertEquals(1,
+				likeService.getLikes(2, Direction.BOTH, Vote.UP).length);
+
+		likeService.putEdge(1, 3, Vote.UP);
+		likeService.putEdge(2, 1, Vote.UP);
+		likeService.putEdge(2, 3, Vote.UP);
+		/*
+		 * Now 1 and 2 should have 1 incoming and 2 outgoing likes.
+		 * Directoin.both should only return 2 as 1->2 and 2->1 are creating
+		 * duplicate IDs
+		 */
+
+		Assert.assertEquals(2,
+				likeService.getLikes(1, Direction.BOTH, Vote.UP).length);
+		Assert.assertEquals(2,
+				likeService.getLikes(2, Direction.BOTH, Vote.UP).length);
+		Assert.assertEquals(2,
+				likeService.getLikes(3, Direction.BOTH, Vote.UP).length);
+
 	}
 
 	@Test

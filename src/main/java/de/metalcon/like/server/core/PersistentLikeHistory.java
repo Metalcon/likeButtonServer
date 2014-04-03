@@ -128,8 +128,6 @@ public class PersistentLikeHistory {
 
 	public static void clearDataBase(String areYouSure) throws IOException {
 		if (areYouSure.equals("Yes I am")) {
-			System.out.println("Deleting persistent Like History directory "
-					+ storageDir);
 			File storage = new File(storageDir);
 			if (storage.exists()) {
 				IOHelper.deleteFile(storage);

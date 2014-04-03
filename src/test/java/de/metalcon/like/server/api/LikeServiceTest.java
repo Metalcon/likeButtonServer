@@ -2,35 +2,37 @@ package de.metalcon.like.server.api;
 
 import static org.junit.Assert.fail;
 
-import java.io.FileNotFoundException;
-
 import org.junit.Test;
 
-import de.metalcon.like.server.api.LikeService;
+import de.metalcon.exceptions.MetalconException;
 
 public class LikeServiceTest extends AbstractLikeServiceTest {
 
-    @Test
-    public void testLikeService() {
-        try {
-            likeService = new LikeService("/dev/shm");
-        } catch (Exception e) {
-            fail("LikeService() canot create directory" + e.getMessage());
-        }
+	@Test
+	public void testLikeService() throws MetalconException {
+		likeService.clearDataBase("Yes I am");
+		try {
+			likeService = new LikeService("/dev/shm");
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 
-        try {
-            likeService = new LikeService(TEST_FOLDER);
-        } catch (Exception e) {
+		try {
+			likeService = new LikeService(TEST_FOLDER);
+			fail("LikeService() could be initialized twice");
+		} catch (Exception e) {
+		}
 
-        }
-        try {
-            likeService =
-                    new LikeService(TEST_FOLDER + (Math.random() * 10000));
-        } catch (Exception e) {
-            assert (e.getClass().equals(FileNotFoundException.class));
-        }
+		try {
+			likeService.clearDataBase("Yes I am");
+			likeService = new LikeService(TEST_FOLDER + (Math.random() * 10000));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("LikeService() canot create directory " + e.getMessage());
+		}
 
-        //TODO: fitting this to the desired API. class LikeService() has to be singleton and it should be possible to chose any directory 
+		// TODO: fitting this to the desired API. class LikeService() has to be
+		// singleton and it should be possible to chose any directory
 
-    }
+	}
 }

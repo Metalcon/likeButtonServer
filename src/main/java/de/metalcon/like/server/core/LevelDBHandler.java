@@ -1,6 +1,7 @@
 package de.metalcon.like.server.core;
 
-import static org.fusesource.leveldbjni.JniDBFactory.*;
+import static org.fusesource.leveldbjni.JniDBFactory.asString;
+import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,7 +77,6 @@ public class LevelDBHandler {
 	public static void clearDataBase(String areYouSure) throws IOException {
 		if (areYouSure.equals("Yes I am") && db != null) {
 			db.close();
-			System.out.println("Deleting LevelDB directory " + DBPath_);
 			IOHelper.deleteFile(new File(DBPath_));
 			db = null;
 		}
@@ -142,6 +142,45 @@ public class LevelDBHandler {
 	}
 
 	/**
+	 * Removes value from the array associated with the specified key in the DB.
+	 * 
+	 * @param key
+	 *            key associated with the array from which the specified value
+	 *            has to be removed
+	 * @param value
+	 *            value to be removed from the array
+	 * @return boolean true if the element has been found and removed
+	 */
+	public boolean setRemove(final byte[] key, final long value) {
+		long[] valueArray = getLongs(key);
+
+		if (valueArray == null) {
+			return false;
+		} else {
+			/*
+			 * Seek the element
+			 */
+			int pos = -1;
+			for (long current : valueArray) {
+				pos++;
+				if (current == value) {
+					break;
+				}
+			}
+			if (pos == -1) {
+				return false;
+			}
+
+			long[] tmp = new long[valueArray.length - 1];
+			System.arraycopy(valueArray, 0, tmp, 0, pos);
+			System.arraycopy(valueArray, pos + 1, tmp, 0, tmp.length - pos);
+			valueArray = tmp;
+		}
+		put(key, valueArray);
+		return true;
+	}
+
+	/**
 	 * Removes value from the array associated with the specified key in the DB
 	 * 
 	 * @param key
@@ -169,7 +208,7 @@ public class LevelDBHandler {
 			}
 			elementPointer++;
 		}
-		
+
 		/*
 		 * Element has been found
 		 */

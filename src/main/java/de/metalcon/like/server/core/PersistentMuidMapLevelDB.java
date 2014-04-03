@@ -70,9 +70,7 @@ public class PersistentMuidMapLevelDB {
 	 *            The element to be deleted from the list
 	 */
 	public void remove(final long keyUUID, final long valueUUID) {
-		/*
-		 * TODO To be implemented
-		 */
+		dbHandler.setRemove(dbHandler.generateKey(keyUUID), valueUUID);
 	}
 
 	/**

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.metalcon.exceptions.MetalconException;
+import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.like.api.Direction;
 import de.metalcon.like.server.core.LevelDBHandler;
 import de.metalcon.like.server.core.Like;
@@ -40,13 +41,14 @@ public class LikeService implements LikeGraphApi {
 	}
 
 	@Override
-	public long[] getCommonNodes(final long uuid1, final long uuid2) {
-		Node f = NodeFactory.getNode(uuid1);
+	public long[] getCommonNodes(final long from, final long to) {
+		Node f = NodeFactory.getNode(from);
 		if (f == null) {
-			// System.err.println("Unknown Node uuid: " + uuid1);
-			return new long[0];
+			throw new MetalconRuntimeException(
+					"Requested getCommonNodes with an unknown from ID");
+			// return null;
 		}
-		return f.getCommonNodes(uuid2);
+		return f.getCommonNodes(to);
 	}
 
 	@Override
@@ -66,7 +68,10 @@ public class LikeService implements LikeGraphApi {
 	}
 
 	/**
-	 * Delete the friendship between from and to z@throws IOException
+	 * Delete the friendship between from and to. If from, to or the edge did
+	 * not exist, nothing will happen
+	 * 
+	 * @throws IOException
 	 */
 	@Override
 	public void deleteEdge(final long from, final long to) throws IOException {
@@ -107,6 +112,17 @@ public class LikeService implements LikeGraphApi {
 		} else {
 			long[] incoming = n.getLikesIn(vote).toArray();
 			long[] outgoing = n.getLikesOut(vote).toArray();
+
+			if (incoming == null) {
+				if (outgoing == null) {
+					return null;
+				} else {
+					return outgoing;
+				}
+			}
+			if (outgoing == null) {
+				return incoming;
+			}
 			/*
 			 * Merge both lists
 			 */
@@ -238,5 +254,25 @@ public class LikeService implements LikeGraphApi {
 	 */
 	public boolean nodeExists(final long muid) {
 		return NodeFactory.nodeExists(muid);
+	}
+
+	/**
+	 * @return all Muids of nodes that have ever stored any like
+	 */
+	public long[] getAllNownNodes() {
+		return NodeFactory.getAllNodeMuids();
+	}
+
+	/**
+	 * Reads the persistent like histories and adds new likes in to the commons
+	 * list of each node
+	 */
+	public long updateAllNodes() {
+		long start = System.nanoTime();
+		for (long uuid : NodeFactory.getAllNodeMuids()) {
+			Node n = NodeFactory.getNode(uuid);
+			n.updateCommons();
+		}
+		return System.nanoTime() - start;
 	}
 }

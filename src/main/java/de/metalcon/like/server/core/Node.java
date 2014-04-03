@@ -264,9 +264,12 @@ public class Node {
 		if (like.getVote() == Vote.UP) {
 			likeCommons.friendAdded(likedNode);
 			dislikeCommons.friendRemoved(likedNode);
-		} else {
+		} else if (like.getVote() == Vote.UP) {
 			likeCommons.friendRemoved(likedNode);
 			dislikeCommons.friendAdded(likedNode);
+		} else {
+			likeCommons.friendRemoved(likedNode);
+			dislikeCommons.friendRemoved(likedNode);
 		}
 
 		synchronized (lastLikesCache) {
