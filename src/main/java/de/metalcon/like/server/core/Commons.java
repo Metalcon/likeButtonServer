@@ -28,7 +28,8 @@ class Commons {
 	 */
 	public Commons(final Node node, final Vote likeType) {
 		this.node = node;
-		persistentCommonsMap = new PersistentMuidMapLevelDB(node.getUUID());
+		persistentCommonsMap = new PersistentMuidMapLevelDB(node.getMuid() + ""
+				+ likeType);
 		this.likeType = likeType;
 	}
 
@@ -41,15 +42,15 @@ class Commons {
 
 	/**
 	 * Reads the persistent PersistentCommonsFile from disk and returns all
-	 * uuids that have the node uuid in common with this node
+	 * muids that have the node muid in common with this node
 	 * 
-	 * @param uuid
+	 * @param muid
 	 *            The entity the returned uuids have in common with this node
 	 * @return The uuids of the nodes that have the entity uuid with the owner
 	 *         of this Commons in common. The last uuids in the list may be 0
 	 */
-	public long[] getCommonNodes(long uuid) {
-		long[] commons = persistentCommonsMap.get(uuid);
+	public long[] getCommonNodes(long muid) {
+		long[] commons = persistentCommonsMap.get(muid);
 
 		if (commons != null) {
 			/*
@@ -108,13 +109,19 @@ class Commons {
 	 *            The friend to be removed from the commonsMap
 	 */
 	public void friendRemoved(Node friend) {
-		for (Like like : friend.getLikesFromTimeOn(0)) {
+		for (long outID : friend.getLikesOut(Vote.UP)) {
 			/*
 			 * Remove the friend from the commons list of the liked entity
 			 */
-			persistentCommonsMap.remove(like.getMUID(), friend.getUUID());
+			persistentCommonsMap.remove(outID, friend.getMuid());
 		}
-		persistentCommonsMap.removeKey(friend.getUUID());
+
+		for (long outID : friend.getLikesOut(Vote.DOWN)) {
+			/*
+			 * Remove the friend from the commons list of the liked entity
+			 */
+			persistentCommonsMap.remove(outID, friend.getMuid());
+		}
 	}
 
 	/**
@@ -136,14 +143,14 @@ class Commons {
 		int searchTS = ignoreTimestamp ? 0 : persistentCommonsMap
 				.getLastUpdateTimeStamp();
 		for (Like like : friend.getLikesFromTimeOn(searchTS)) {
-			if (like.getMUID() == node.getUUID()) {
+			if (like.getMUID() == node.getMuid()) {
 				continue;
 			}
 			if (like.getVote() == likeType) {
 				/*
 				 * Q1 node -> friend -> likedNode
 				 */
-				persistentCommonsMap.append(like.getMUID(), friend.getUUID());
+				persistentCommonsMap.append(like.getMUID(), friend.getMuid());
 
 				/*
 				 * Q2 node -> likedNode && node -> friend -> likedNode FIXME:
@@ -153,13 +160,19 @@ class Commons {
 				 * friend.getLikedNodes()
 				 */
 				if (node.getLikesOut(likeType).contains(like.getMUID())) {
-					persistentCommonsMap.append(friend.getUUID(),
+					persistentCommonsMap.append(friend.getMuid(),
 							like.getMUID());
 				}
 			} else {
-				persistentCommonsMap.remove(like.getMUID(), friend.getUUID());
-				persistentCommonsMap.remove(friend.getUUID(), like.getMUID());
+				persistentCommonsMap.remove(like.getMUID(), friend.getMuid());
+				persistentCommonsMap.remove(friend.getMuid(), like.getMUID());
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return node.getMuid() + "(" + likeType + "):\n"
+				+ persistentCommonsMap.toString();
 	}
 }

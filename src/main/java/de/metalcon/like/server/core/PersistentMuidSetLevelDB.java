@@ -69,7 +69,7 @@ public class PersistentMuidSetLevelDB implements Iterable<Long> {
 	}
 
 	public boolean remove(Node n) {
-		return remove(n.getUUID());
+		return remove(n.getMuid());
 	}
 
 	/**
@@ -106,7 +106,7 @@ class ArrayIterator implements Iterator<Long> {
 
 	@Override
 	public boolean hasNext() {
-		return pos < array.length;
+		return array == null ? false : pos < array.length;
 	}
 
 	@Override

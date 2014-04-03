@@ -22,6 +22,7 @@ public class LevelDBHandler {
 	private static DB db = null;
 
 	private final byte[] keyPrefix;
+	private final long keyPrefixID;
 
 	private static String DBPath_;
 
@@ -59,6 +60,7 @@ public class LevelDBHandler {
 	}
 
 	public LevelDBHandler(final long keyPrefix) {
+		keyPrefixID = keyPrefix;
 		this.keyPrefix = new byte[8];
 		this.keyPrefix[0] = (byte) (keyPrefix >> 56);
 		this.keyPrefix[1] = (byte) (keyPrefix >> 48);
@@ -173,7 +175,7 @@ public class LevelDBHandler {
 
 			long[] tmp = new long[valueArray.length - 1];
 			System.arraycopy(valueArray, 0, tmp, 0, pos);
-			System.arraycopy(valueArray, pos + 1, tmp, 0, tmp.length - pos);
+			System.arraycopy(valueArray, pos + 1, tmp, pos, tmp.length - pos);
 			valueArray = tmp;
 		}
 		put(key, valueArray);
@@ -317,6 +319,7 @@ public class LevelDBHandler {
 	}
 
 	public byte[] generateKey(final String keySuffix) {
+		// return bytes(keyPrefixID + keySuffix);
 		return generateKey(keySuffix.hashCode());
 	}
 
@@ -365,14 +368,23 @@ public class LevelDBHandler {
 		return out;
 	}
 
-	public static void printDB() {
+	@Override
+	public String toString() {
 		if (db == null) {
-			return;
+			return "DB is Empty";
 		}
+		StringBuilder builder = new StringBuilder();
 		DBIterator iterator = db.iterator();
-		for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+		outer: for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+			byte[] key = iterator.peekNext().getKey();
+			// for (int i = 0; i != keyPrefix.length; i++) {
+			// if (key[i] != keyPrefix[i]) {
+			// continue outer;
+			// }
+			// }
 			System.out.println(asString(iterator.peekNext().getKey()) + ":");
-			System.out.println("\t"
+			builder.append(asString(iterator.peekNext().getKey()) + ":");
+			builder.append("\t"
 					+ Arrays.toString((long[]) DeSerialize(iterator.peekNext()
 							.getValue())));
 		}
@@ -381,5 +393,6 @@ public class LevelDBHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return builder.toString();
 	}
 }

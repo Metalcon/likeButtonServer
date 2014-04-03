@@ -2,13 +2,15 @@ package de.metalcon.like.server.core;
 
 import java.util.HashMap;
 
+import de.metalcon.exceptions.MetalconRuntimeException;
+
 /**
  * @author Jonas Kunze
  */
 public class PersistentMuidMapLevelDB {
 	LevelDBHandler dbHandler;
 
-	public PersistentMuidMapLevelDB(final long keyPrefix) {
+	public PersistentMuidMapLevelDB(final String keyPrefix) {
 		dbHandler = new LevelDBHandler(keyPrefix);
 	}
 
@@ -80,6 +82,12 @@ public class PersistentMuidMapLevelDB {
 		/*
 		 * TODO To be implemented
 		 */
+		throw new MetalconRuntimeException("Not yet implemented");
+	}
+
+	@Override
+	public String toString() {
+		return dbHandler.toString();
 	}
 
 }

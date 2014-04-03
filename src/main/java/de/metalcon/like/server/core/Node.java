@@ -13,7 +13,7 @@ public class Node {
 	private static final int LastLikeCacheSize = 10;
 
 	// Class Variables
-	private final long UUID;
+	private final long Muid;
 
 	private final Commons likeCommons;
 
@@ -48,32 +48,32 @@ public class Node {
 	/**
 	 * This constructor may only be called by the NodeFactory class
 	 * 
-	 * @param uuid
-	 *            The uuid of the node
+	 * @param muid
+	 *            The muid of the node
 	 * @param storageDir
 	 *            The path to the directory where all node files are stored
 	 * @param isNewNode
 	 *            If false the corresponding files will be read into memory. If
 	 *            true we will not touch the disk.
 	 */
-	Node(final long uuid, boolean isNewNode) {
-		UUID = uuid;
+	Node(final long muid, boolean isNewNode) {
+		Muid = muid;
 		// commons = new Commons(this, storageDir,
-		// PersistentUUIDArrayMap.class);
+		// PersistentMuidArrayMap.class);
 
 		// commons = new Commons(this, storageDir,
-		// PersistentUUIDArrayMapRedis.class);
+		// PersistentMuidArrayMapRedis.class);
 
-		// commons = new Commons(this, storageDir, LazyPersistentUUIDMap.class);
+		// commons = new Commons(this, storageDir, LazyPersistentMuidMap.class);
 
 		likeCommons = new Commons(this, Vote.UP);
 
 		dislikeCommons = new Commons(this, Vote.DOWN);
 
 		// try {
-		// friends = new PersistentUUIDSet(storageDir + "/" + UUID
+		// friends = new PersistentMuidSet(storageDir + "/" + Muid
 		// + "_friends");
-		// inNodes = new PersistentUUIDSet(storageDir + "/" + UUID
+		// inNodes = new PersistentMuidSet(storageDir + "/" + Muid
 		// + "_inNodes");
 		//
 		// } catch (IOException e) {
@@ -81,12 +81,12 @@ public class Node {
 		// System.exit(1);
 		// }
 
-		likedOut = new PersistentMuidSetLevelDB(UUID + "likedOut");
-		likedIn = new PersistentMuidSetLevelDB(UUID + "likedIn");
-		dislikedOut = new PersistentMuidSetLevelDB(UUID + "dislikedOut");
-		dislikedIn = new PersistentMuidSetLevelDB(UUID + "dislikedIn");
+		likedOut = new PersistentMuidSetLevelDB(Muid + "likedOut");
+		likedIn = new PersistentMuidSetLevelDB(Muid + "likedIn");
+		dislikedOut = new PersistentMuidSetLevelDB(Muid + "dislikedOut");
+		dislikedIn = new PersistentMuidSetLevelDB(Muid + "dislikedIn");
 
-		likeHistory = new PersistentLikeHistory(UUID);
+		likeHistory = new PersistentLikeHistory(Muid);
 	}
 
 	/**
@@ -95,8 +95,8 @@ public class Node {
 	 * @throws IOException
 	 */
 	public void delete() throws IOException {
-		for (long friendUUID : likedOut) {
-			Node n = NodeFactory.getNode(friendUUID);
+		for (long friendMuid : likedOut) {
+			Node n = NodeFactory.getNode(friendMuid);
 			n.removeFriendship(this);
 		}
 		likeCommons.delete();
@@ -107,7 +107,7 @@ public class Node {
 		dislikedOut.delete();
 		dislikedIn.delete();
 
-		NodeFactory.removeNodeFromPersistentList(UUID);
+		NodeFactory.removeNodeFromPersistentList(Muid);
 
 		likeHistory.delete();
 	}
@@ -254,8 +254,8 @@ public class Node {
 			likedNode = NodeFactory.createNewNode(like.getMUID());
 		}
 
-		addOutNode(likedNode.UUID, like.getVote());
-		likedNode.addInNode(UUID, like.getVote());
+		addOutNode(likedNode.Muid, like.getVote());
+		likedNode.addInNode(Muid, like.getVote());
 
 		/*
 		 * Update the commons maps by adding likedNode to all out nodes of
@@ -264,7 +264,7 @@ public class Node {
 		if (like.getVote() == Vote.UP) {
 			likeCommons.friendAdded(likedNode);
 			dislikeCommons.friendRemoved(likedNode);
-		} else if (like.getVote() == Vote.UP) {
+		} else if (like.getVote() == Vote.DOWN) {
 			likeCommons.friendRemoved(likedNode);
 			dislikeCommons.friendAdded(likedNode);
 		} else {
@@ -297,9 +297,9 @@ public class Node {
 	 * @throws IOException
 	 * @see Like#Like
 	 */
-	public void addLike(final long uuid, final int timestamp, final Vote vote)
+	public void addLike(final long muid, final int timestamp, final Vote vote)
 			throws IOException {
-		addLike(new Like(uuid, timestamp, vote));
+		addLike(new Like(muid, timestamp, vote));
 	}
 
 	/**
@@ -312,7 +312,7 @@ public class Node {
 	 * @throws IOException
 	 */
 	public void removeFriendship(Node friend) throws IOException {
-		addLike(new Like(friend.getUUID(),
+		addLike(new Like(friend.getMuid(),
 				(int) System.currentTimeMillis() / 1000, Vote.NEUTRAL));
 	}
 
@@ -322,19 +322,19 @@ public class Node {
 	 * @param inNode
 	 *            The node to be added
 	 */
-	private void addOutNode(final long outNodeUUID, final Vote v) {
+	private void addOutNode(final long outNodeMuid, final Vote v) {
 		synchronized (dislikedOut) {
 			synchronized (likedOut) {
 				synchronized (likedOut) {
 					if (v == Vote.UP) {
-						likedOut.add(outNodeUUID);
-						dislikedOut.remove(outNodeUUID);
+						likedOut.add(outNodeMuid);
+						dislikedOut.remove(outNodeMuid);
 					} else if (v == Vote.DOWN) {
-						likedOut.remove(outNodeUUID);
-						dislikedOut.add(outNodeUUID);
+						likedOut.remove(outNodeMuid);
+						dislikedOut.add(outNodeMuid);
 					} else {
-						likedOut.remove(outNodeUUID);
-						dislikedOut.remove(outNodeUUID);
+						likedOut.remove(outNodeMuid);
+						dislikedOut.remove(outNodeMuid);
 					}
 				}
 			}
@@ -347,18 +347,18 @@ public class Node {
 	 * @param inNode
 	 *            The node to be added
 	 */
-	private void addInNode(final long inNodeUUID, final Vote v) {
+	private void addInNode(final long inNodeMuid, final Vote v) {
 		synchronized (likedIn) {
 			synchronized (dislikedIn) {
 				if (v == Vote.UP) {
-					likedIn.add(inNodeUUID);
-					dislikedIn.remove(inNodeUUID);
+					likedIn.add(inNodeMuid);
+					dislikedIn.remove(inNodeMuid);
 				} else if (v == Vote.DOWN) {
-					likedIn.remove(inNodeUUID);
-					dislikedIn.add(inNodeUUID);
+					likedIn.remove(inNodeMuid);
+					dislikedIn.add(inNodeMuid);
 				} else {
-					likedIn.remove(inNodeUUID);
-					dislikedIn.remove(inNodeUUID);
+					likedIn.remove(inNodeMuid);
+					dislikedIn.remove(inNodeMuid);
 				}
 			}
 		}
@@ -393,30 +393,30 @@ public class Node {
 
 	/**
 	 * Returns all MUIDs that are liked by this node and liked the node with the
-	 * given uuid
+	 * given muid
 	 * 
-	 * @param uuid
-	 *            The entity the returned uuids have in common with this node
-	 * @return The nodes that have the entity uuid with this node in common
+	 * @param muid
+	 *            The entity the returned muids have in common with this node
+	 * @return The nodes that have the entity muid with this node in common
 	 */
-	public long[] getCommonNodes(long uuid) {
-		return likeCommons.getCommonNodes(uuid);
+	public long[] getCommonNodes(long muid) {
+		return likeCommons.getCommonNodes(muid);
 	}
 
 	/**
 	 * Returns all MUIDs that are liked by this node and disliked the node with
-	 * the given uuid
+	 * the given muid
 	 * 
-	 * @param uuid
-	 *            The entity the returned uuids have in common with this node
-	 * @return The nodes that have the entity uuid with this node in common
+	 * @param muid
+	 *            The entity the returned muids have in common with this node
+	 * @return The nodes that have the entity muid with this node in common
 	 */
-	public long[] getCommonDislikedNodes(long uuid) {
-		return dislikeCommons.getCommonNodes(uuid);
+	public long[] getCommonDislikedNodes(long muid) {
+		return dislikeCommons.getCommonNodes(muid);
 	}
 
-	public final long getUUID() {
-		return UUID;
+	public final long getMuid() {
+		return Muid;
 	}
 
 	protected Commons getCommons() {
