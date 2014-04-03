@@ -31,7 +31,7 @@ public class DeleteEdgeTest extends AbstractLikeServiceTest {
 
 		likeService.updateAllNodes();
 
-		long[] commons = likeService.getCommonNodes(1, 3);
+		long[] commons = likeService.getCommonNodes(1, 3, Vote.UP);
 		HashSet<Long> set = convertArrayToHashSet(commons);
 
 		assertTrue(set.contains(2L));
@@ -49,11 +49,11 @@ public class DeleteEdgeTest extends AbstractLikeServiceTest {
 		assertFalse(set.contains(2L));
 		assertTrue(set.contains(4L));
 
-		set = convertArrayToHashSet(likeService.getCommonNodes(1, 2));
+		set = convertArrayToHashSet(likeService.getCommonNodes(1, 2, Vote.UP));
 		assertFalse(set.contains(2L));
 		assertTrue(set.contains(4L));
 
-		set = convertArrayToHashSet(likeService.getCommonNodes(1, 3));
+		set = convertArrayToHashSet(likeService.getCommonNodes(1, 3, Vote.UP));
 		assertFalse(set.contains(2L));
 		assertTrue(set.contains(4L));
 	}
