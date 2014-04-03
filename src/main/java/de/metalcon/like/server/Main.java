@@ -5,9 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import de.metalcon.exceptions.MetalconException;
+import de.metalcon.like.api.Vote;
 import de.metalcon.like.server.api.LikeGraphApi;
 import de.metalcon.like.server.api.LikeService;
-import de.metalcon.like.server.api.Vote;
 
 /**
  * Hello world!
@@ -115,7 +115,7 @@ public class Main {
 	public static int testInCommons(LikeGraphApi graph, long from, long to,
 			boolean verbose) throws IOException {
 		long start = System.nanoTime();
-		long[] commons = graph.getCommonNodes(from, to);
+		long[] commons = graph.getCommonNodes(from, to, Vote.UP);
 		long end = System.nanoTime();
 
 		if (commons != null) {

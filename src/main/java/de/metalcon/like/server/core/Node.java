@@ -2,7 +2,8 @@ package de.metalcon.like.server.core;
 
 import java.io.IOException;
 
-import de.metalcon.like.server.api.Vote;
+import de.metalcon.exceptions.MetalconRuntimeException;
+import de.metalcon.like.api.Vote;
 
 /**
  * @author Jonas Kunze
@@ -396,11 +397,19 @@ public class Node {
 	 * given muid
 	 * 
 	 * @param muid
-	 *            The entity the returned muids have in common with this node
+	 *            The muid of the node the returned muids have in common with
+	 *            this node
+	 * @param v
+	 *            the requested relation: Vote.UP or Vote.DOWN
 	 * @return The nodes that have the entity muid with this node in common
 	 */
-	public long[] getCommonNodes(long muid) {
-		return likeCommons.getCommonNodes(muid);
+	public long[] getCommonNodes(long muid, Vote v) {
+		if (v == Vote.UP) {
+			return likeCommons.getCommonNodes(muid);
+		} else if (v == Vote.UP) {
+			return dislikeCommons.getCommonNodes(muid);
+		}
+		throw new MetalconRuntimeException("Wrong parameter v: " + v);
 	}
 
 	/**

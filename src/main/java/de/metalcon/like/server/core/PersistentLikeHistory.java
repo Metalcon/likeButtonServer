@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import de.metalcon.domain.MuidConverter;
 import de.metalcon.exceptions.MetalconException;
-import de.metalcon.like.server.api.Vote;
+import de.metalcon.like.api.Vote;
 
 /**
  * @author Jonas Kunze

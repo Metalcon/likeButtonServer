@@ -22,7 +22,6 @@ public class LevelDBHandler {
 	private static DB db = null;
 
 	private final byte[] keyPrefix;
-	private final long keyPrefixID;
 
 	private static String DBPath_;
 
@@ -50,7 +49,7 @@ public class LevelDBHandler {
 				db = factory.open(new File(DBPath), options);
 			} catch (IOException e) {
 				throw new MetalconException("Unable to instanciate levelDB on "
-						+ DBPath);
+						+ DBPath + ": " + e.getMessage());
 			}
 		} else {
 			throw new MetalconException(
@@ -60,7 +59,6 @@ public class LevelDBHandler {
 	}
 
 	public LevelDBHandler(final long keyPrefix) {
-		keyPrefixID = keyPrefix;
 		this.keyPrefix = new byte[8];
 		this.keyPrefix[0] = (byte) (keyPrefix >> 56);
 		this.keyPrefix[1] = (byte) (keyPrefix >> 48);
@@ -375,13 +373,7 @@ public class LevelDBHandler {
 		}
 		StringBuilder builder = new StringBuilder();
 		DBIterator iterator = db.iterator();
-		outer: for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-			byte[] key = iterator.peekNext().getKey();
-			// for (int i = 0; i != keyPrefix.length; i++) {
-			// if (key[i] != keyPrefix[i]) {
-			// continue outer;
-			// }
-			// }
+		for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
 			System.out.println(asString(iterator.peekNext().getKey()) + ":");
 			builder.append(asString(iterator.peekNext().getKey()) + ":");
 			builder.append("\t"

@@ -6,6 +6,7 @@ package de.metalcon.like.server.api;
 import java.io.IOException;
 
 import de.metalcon.like.api.Direction;
+import de.metalcon.like.api.Vote;
 
 /**
  * @author Rene Pickhardt
@@ -14,25 +15,34 @@ import de.metalcon.like.api.Direction;
 public interface LikeGraphApi {
 
 	/**
-	 * Retrieves the list of common neighbors of 2 nodes in the graph with uuid1
-	 * and uuid2
+	 * Retrieves the list of common neighbors (X) such that
 	 * 
-	 * @param uuid1
-	 * @param uuid2
-	 * @return
+	 * (from) -[:(dis)like]-> (X) -[:(dis)like]-> (to)
+	 * 
+	 * @param from
+	 *            muid of the (from) node (see top)
+	 * @param to
+	 *            muid of the (to) node (see top)
+	 * @param v
+	 *            defines the relation: Vote.up or Vote.down between (from), (X)
+	 *            and (to)
+	 * @return (X), the muids that (from) has in common with (to)
 	 */
-	public long[] getCommonNodes(long uuid1, long uuid2) throws IOException;
+	public long[] getCommonNodes(long from, long to, Vote v) throws IOException;
 
 	/**
-	 * Returns a list of MUIDs of nodes liked by nodes liked by the node
-	 * associated with the given nodeMUID
+	 * Returns a list of Muids of nodes (dis)liked by nodes (dis)liked by the
+	 * node associated with the given nodeMUID
 	 * 
 	 * @param nodeMUID
 	 *            The requested node
+	 * @param vote
+	 *            The relation type (Vote.UP or Vote.DOWN)
 	 * @return The list of nodes liked by any node liked by the node with the
 	 *         given MUID
 	 */
-	public long[] getLikedLikes(final long nodeMUID) throws IOException;
+	public long[] getLikedLikes(final long nodeMUID, final Vote vote)
+			throws IOException;
 
 	/**
 	 * puts a new Edge to the data store.

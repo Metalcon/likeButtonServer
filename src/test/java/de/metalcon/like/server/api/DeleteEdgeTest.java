@@ -9,6 +9,7 @@ import java.util.HashSet;
 import org.junit.Test;
 
 import de.metalcon.like.api.Direction;
+import de.metalcon.like.api.Vote;
 
 public class DeleteEdgeTest extends AbstractLikeServiceTest {
 
