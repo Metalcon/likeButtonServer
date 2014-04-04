@@ -2,16 +2,17 @@ package de.metalcon.like.server.core;
 
 import java.util.HashMap;
 
+import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconRuntimeException;
 
 /**
  * @author Jonas Kunze
  */
 public class PersistentMuidMapLevelDB {
-	LevelDBHandler dbHandler;
+	LevelDbHandler dbHandler;
 
 	public PersistentMuidMapLevelDB(final String keyPrefix) {
-		dbHandler = new LevelDBHandler(keyPrefix);
+		dbHandler = new LevelDbHandler(keyPrefix);
 	}
 
 	/**
@@ -36,7 +37,7 @@ public class PersistentMuidMapLevelDB {
 	 * @param valueUUID
 	 */
 	public void append(final long keyUUID, final long valueUUID) {
-		dbHandler.setAdd(dbHandler.generateKey(keyUUID), valueUUID);
+		dbHandler.addToSet(keyUUID, valueUUID);
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class PersistentMuidMapLevelDB {
 	 * @see HashMap#get(Object)
 	 */
 	public long[] get(final long keyUUID) {
-		return dbHandler.getLongs(dbHandler.generateKey(keyUUID));
+		return dbHandler.getLongs(keyUUID);
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class PersistentMuidMapLevelDB {
 	 *            The element to be deleted from the list
 	 */
 	public void remove(final long keyUUID, final long valueUUID) {
-		dbHandler.setRemove(dbHandler.generateKey(keyUUID), valueUUID);
+		dbHandler.removeFromSet(keyUUID, valueUUID);
 	}
 
 	/**

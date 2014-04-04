@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconException;
 import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.like.api.Direction;
 import de.metalcon.like.api.Vote;
-import de.metalcon.like.server.core.LevelDBHandler;
 import de.metalcon.like.server.core.Like;
 import de.metalcon.like.server.core.Node;
 import de.metalcon.like.server.core.NodeFactory;
@@ -35,7 +35,7 @@ public class LikeService implements LikeGraphApi {
 			}
 		}
 
-		LevelDBHandler.initialize(storageDir + "/levelDB");
+		LevelDbHandler.initialize(storageDir + "/levelDB");
 		PersistentLikeHistory.initialize(storageDir + "/likesDB");
 		PersistentMuidSetLevelDB.initialize();
 		NodeFactory.initialize(storageDir);
@@ -210,7 +210,7 @@ public class LikeService implements LikeGraphApi {
 	public void clearDataBase(String areYouSure) throws MetalconException {
 		if (areYouSure.equals("Yes I am")) {
 			try {
-				LevelDBHandler.clearDataBase(areYouSure);
+				LevelDbHandler.clearDataBase(areYouSure);
 				PersistentLikeHistory.clearDataBase(areYouSure);
 				NodeFactory.clearDataBase(areYouSure);
 			} catch (IOException e) {
