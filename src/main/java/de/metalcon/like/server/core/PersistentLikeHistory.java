@@ -10,7 +10,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.metalcon.dbhelper.IOHelper;
-import de.metalcon.domain.MuidConverter;
+import de.metalcon.domain.helper.UidConverter;
 import de.metalcon.exceptions.MetalconException;
 import de.metalcon.like.api.Vote;
 
@@ -105,7 +105,7 @@ public class PersistentLikeHistory {
 		PersistentLikeHistory.storageDir = storageDir;
 
 		char[] counters = new char[storageRecursiveDepth];
-		char[] availableFolderNames = MuidConverter.getAllowedFolderNames();
+		char[] availableFolderNames = UidConverter.getAllowedFolderNames();
 
 		while (true) {
 			String relPath = "";
@@ -138,7 +138,7 @@ public class PersistentLikeHistory {
 
 	private static String generateFileName(final long uuid) {
 
-		return storageDir + "/" + MuidConverter.getMUIDStoragePath(uuid) + uuid
+		return storageDir + "/" + UidConverter.getMuidStoragePath(uuid) + uuid
 				+ "_likes";
 	}
 

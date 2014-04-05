@@ -2,6 +2,7 @@ package de.metalcon.like.server.core;
 
 import java.util.HashMap;
 
+import de.metalcon.dbhelper.ElementNotFoundException;
 import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconRuntimeException;
 
@@ -19,7 +20,11 @@ public class PersistentMuidMapLevelDB {
 	 * @return The timestamp of the last update
 	 */
 	public int getLastUpdateTimeStamp() {
-		return dbHandler.getInt("UpdateTS");
+		try {
+			return dbHandler.getInt("UpdateTS");
+		} catch (ElementNotFoundException e) {
+			return 0;
+		}
 	}
 
 	/**
