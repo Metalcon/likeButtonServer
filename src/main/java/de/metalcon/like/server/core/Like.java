@@ -1,6 +1,6 @@
 package de.metalcon.like.server.core;
 
-import de.metalcon.like.server.api.Vote;
+import de.metalcon.like.api.Vote;
 
 
 /**

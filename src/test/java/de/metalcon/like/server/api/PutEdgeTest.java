@@ -11,6 +11,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import de.metalcon.like.api.Direction;
+import de.metalcon.like.api.Vote;
 
 public class PutEdgeTest extends AbstractLikeServiceTest {
 

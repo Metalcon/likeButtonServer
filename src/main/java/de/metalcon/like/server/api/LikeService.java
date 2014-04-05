@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconException;
 import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.like.api.Direction;
-import de.metalcon.like.server.core.LevelDBHandler;
+import de.metalcon.like.api.Vote;
 import de.metalcon.like.server.core.Like;
 import de.metalcon.like.server.core.Node;
 import de.metalcon.like.server.core.NodeFactory;
@@ -34,21 +35,21 @@ public class LikeService implements LikeGraphApi {
 			}
 		}
 
-		LevelDBHandler.initialize(storageDir + "/levelDB");
+		LevelDbHandler.initialize(storageDir + "/levelDB");
 		PersistentLikeHistory.initialize(storageDir + "/likesDB");
 		PersistentMuidSetLevelDB.initialize();
 		NodeFactory.initialize(storageDir);
 	}
 
 	@Override
-	public long[] getCommonNodes(final long from, final long to) {
+	public long[] getCommonNodes(final long from, final long to, Vote v) {
 		Node f = NodeFactory.getNode(from);
 		if (f == null) {
 			throw new MetalconRuntimeException(
 					"Requested getCommonNodes with an unknown from ID");
 			// return null;
 		}
-		return f.getCommonNodes(to);
+		return f.getCommonNodes(to, v);
 	}
 
 	@Override
@@ -163,7 +164,7 @@ public class LikeService implements LikeGraphApi {
 	 *         given MUID
 	 */
 	@Override
-	public long[] getLikedLikes(final long nodeMUID) {
+	public long[] getLikedLikes(final long nodeMUID, final Vote vote) {
 		final Node n = NodeFactory.getNode(nodeMUID);
 		if (n == null) {
 			return null;
@@ -174,7 +175,7 @@ public class LikeService implements LikeGraphApi {
 		/*
 		 * Iterate through all nodes liked by n
 		 */
-		for (long likedMUID : n.getLikesOut(Vote.UP)) {
+		for (long likedMUID : n.getLikesOut(vote)) {
 			if (likedMUID == 0) {
 				break;
 			}
@@ -184,7 +185,7 @@ public class LikeService implements LikeGraphApi {
 			 * nodes to the set
 			 */
 			final Node likedNode = NodeFactory.getNode(likedMUID);
-			for (long likedlikedMUID : likedNode.getLikesOut(Vote.UP)) {
+			for (long likedlikedMUID : likedNode.getLikesOut(vote)) {
 				if (likedlikedMUID == 0) {
 					break;
 				}
@@ -209,7 +210,7 @@ public class LikeService implements LikeGraphApi {
 	public void clearDataBase(String areYouSure) throws MetalconException {
 		if (areYouSure.equals("Yes I am")) {
 			try {
-				LevelDBHandler.clearDataBase(areYouSure);
+				LevelDbHandler.clearDataBase(areYouSure);
 				PersistentLikeHistory.clearDataBase(areYouSure);
 				NodeFactory.clearDataBase(areYouSure);
 			} catch (IOException e) {
@@ -266,10 +267,17 @@ public class LikeService implements LikeGraphApi {
 	/**
 	 * Reads the persistent like histories and adds new likes in to the commons
 	 * list of each node
+	 * 
+	 * @return The number of nanoseconds spend within this method
 	 */
 	public long updateAllNodes() {
 		long start = System.nanoTime();
-		for (long uuid : NodeFactory.getAllNodeMuids()) {
+		long[] allNodes = NodeFactory.getAllNodeMuids();
+		if (allNodes == null) {
+			return System.nanoTime() - start;
+		}
+
+		for (long uuid : allNodes) {
 			Node n = NodeFactory.getNode(uuid);
 			n.updateCommons();
 		}

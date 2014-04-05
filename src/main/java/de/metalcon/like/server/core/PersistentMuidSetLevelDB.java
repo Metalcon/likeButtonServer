@@ -4,18 +4,19 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconRuntimeException;
 
 /**
  * @author Jonas Kunze
  */
 public class PersistentMuidSetLevelDB implements Iterable<Long> {
-	private static LevelDBHandler db;
+	private static LevelDbHandler db;
 
 	private final byte[] ID;
 
 	public static void initialize() {
-		db = new LevelDBHandler("PersistentUUIDSetLevelDB");
+		db = new LevelDbHandler("PersistentUUIDSetLevelDB");
 	}
 
 	public PersistentMuidSetLevelDB(final String ID) {
@@ -26,7 +27,7 @@ public class PersistentMuidSetLevelDB implements Iterable<Long> {
 	 * Adds the given uuid to the end of the file
 	 */
 	public void add(long uuid) {
-		db.setAdd(ID, uuid);
+		db.addToSet(ID, uuid);
 	}
 
 	/**
