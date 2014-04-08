@@ -268,12 +268,12 @@ public class LikeService implements LikeGraphApi {
     }
 
     /**
-     * Reads the persistent like histories and adds new likes in to the commons
+     * Reads the persistent like histories and adds new likes into the commons
      * list of each node
      * 
      * @return The number of nanoseconds spend within this method
      */
-    public long updateAllNodes() {
+    public long updateAllLargeNodes() {
         long start = System.nanoTime();
         long[] allNodes = NodeFactory.getAllNodeMuids();
         if (allNodes == null) {
@@ -282,7 +282,7 @@ public class LikeService implements LikeGraphApi {
 
         for (long uuid : allNodes) {
             Node n = NodeFactory.getNode(uuid);
-            n.updateCommons();
+            n.updateLargeNodeCommons();
         }
         return System.nanoTime() - start;
     }

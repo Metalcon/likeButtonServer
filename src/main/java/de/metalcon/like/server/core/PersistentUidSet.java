@@ -70,7 +70,7 @@ public class PersistentUidSet implements Iterable<Long> {
 	}
 
 	public boolean remove(Node n) {
-		return remove(n.getMuid());
+		return remove(n.getUid());
 	}
 
 	/**

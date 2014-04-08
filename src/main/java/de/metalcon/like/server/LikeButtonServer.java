@@ -62,7 +62,7 @@ public class LikeButtonServer extends Thread {
         writeWorker.start();
 
         while (true) {
-            long ns = service.updateAllNodes();
+            long ns = service.updateAllLargeNodes();
             if (ns < 1E9) {
                 try {
                     Thread.sleep(1000);

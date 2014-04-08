@@ -29,7 +29,7 @@ public class DeleteEdgeTest extends AbstractLikeServiceTest {
 
         likeService.putEdge(4, 2, Vote.UP);
 
-        likeService.updateAllNodes();
+        likeService.updateAllLargeNodes();
 
         long[] commons = likeService.getCommonNodes(1, 3, Vote.UP);
         HashSet<Long> set = convertArrayToHashSet(commons);
@@ -58,5 +58,4 @@ public class DeleteEdgeTest extends AbstractLikeServiceTest {
         assertFalse(set.contains(2L));
         assertTrue(set.contains(4L));
     }
-
 }
