@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import de.metalcon.exceptions.MetalconException;
 import de.metalcon.like.api.Vote;
-import de.metalcon.like.server.api.LikeGraphApi;
-import de.metalcon.like.server.api.LikeService;
+import de.metalcon.like.server.api.backend.LikeGraphApi;
+import de.metalcon.like.server.api.backend.LikeService;
 
 /**
  * Hello world!

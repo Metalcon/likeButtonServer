@@ -13,7 +13,7 @@ public class NodeFactory {
 	 * The file with all existing node muids. The muids are stored as
 	 * concatenated longs where some might be 0 (fragmentation)
 	 */
-	private static PersistentMuidSetLevelDB AllNodes = null;
+	private static PersistentUidSet AllNodes = null;
 
 	/*
 	 * This Map stores all nodes that are alive.
@@ -48,7 +48,7 @@ public class NodeFactory {
 			throw new RuntimeException(
 					"NodeFactory has already been initialized.");
 		}
-		AllNodes = new PersistentMuidSetLevelDB("AllNodes");
+		AllNodes = new PersistentUidSet("AllNodes");
 		System.out.println("Finished reading " + storDir + ":");
 		System.out.println(AllNodes.size() + " muids");
 	}

@@ -10,7 +10,7 @@ import de.metalcon.exceptions.MetalconRuntimeException;
 /**
  * @author Jonas Kunze
  */
-public class PersistentMuidSetLevelDB implements Iterable<Long> {
+public class PersistentUidSet implements Iterable<Long> {
 	private static LevelDbHandler db;
 
 	private final byte[] ID;
@@ -19,7 +19,7 @@ public class PersistentMuidSetLevelDB implements Iterable<Long> {
 		db = new LevelDbHandler("PersistentUUIDSetLevelDB");
 	}
 
-	public PersistentMuidSetLevelDB(final String ID) {
+	public PersistentUidSet(final String ID) {
 		this.ID = db.generateKey(ID);
 	}
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.metalcon.like.server.api;
+package de.metalcon.like.server.api.backend;
 
 import java.io.IOException;
 

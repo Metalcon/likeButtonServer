@@ -10,6 +10,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import de.metalcon.like.server.api.backend.LikeService;
+
 public abstract class AbstractLikeServiceTest {
 
 	protected final static String TEST_FOLDER = "/dev/shm/like/";

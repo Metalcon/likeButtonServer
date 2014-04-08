@@ -9,10 +9,10 @@ import de.metalcon.exceptions.MetalconRuntimeException;
 /**
  * @author Jonas Kunze
  */
-public class PersistentMuidMapLevelDB {
+public class PersistentUidMap {
 	LevelDbHandler dbHandler;
 
-	public PersistentMuidMapLevelDB(final String keyPrefix) {
+	public PersistentUidMap(final String keyPrefix) {
 		dbHandler = new LevelDbHandler(keyPrefix);
 	}
 

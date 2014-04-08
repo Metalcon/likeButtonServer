@@ -13,49 +13,48 @@ import de.metalcon.like.api.Vote;
 
 public class DeleteEdgeTest extends AbstractLikeServiceTest {
 
-	/**
-	 * Checks if the removed edge is not in the in and out links any more
-	 * 
-	 * @throws IOException
-	 * 
-	 */
-	@Test
-	public void testStateafterRemove() throws IOException {
-		likeService.putEdge(1, 2, Vote.UP);
-		likeService.putEdge(2, 3, Vote.UP);
+    /**
+     * Checks if the removed edge is not in the in and out links any more
+     * 
+     * @throws IOException
+     * 
+     */
+    @Test
+    public void testStateafterRemove() throws IOException {
+        likeService.putEdge(1, 2, Vote.UP);
+        likeService.putEdge(2, 3, Vote.UP);
 
-		likeService.putEdge(1, 4, Vote.UP);
-		likeService.putEdge(4, 3, Vote.UP);
+        likeService.putEdge(1, 4, Vote.UP);
+        likeService.putEdge(4, 3, Vote.UP);
 
-		likeService.putEdge(4, 2, Vote.UP);
+        likeService.putEdge(4, 2, Vote.UP);
 
-		likeService.updateAllNodes();
+        long[] commons = likeService.getCommonNodes(1, 3, Vote.UP);
+        HashSet<Long> set = convertArrayToHashSet(commons);
+        System.out.println(set);
 
-		long[] commons = likeService.getCommonNodes(1, 3, Vote.UP);
-		HashSet<Long> set = convertArrayToHashSet(commons);
+        assertTrue(set.contains(2L));
+        assertTrue(set.contains(4L));
 
-		assertTrue(set.contains(2L));
-		assertTrue(set.contains(4L));
+        long[] likes = likeService.getLikes(1, Direction.BOTH, Vote.UP);
+        set = convertArrayToHashSet(likes);
+        assertTrue(set.contains(2L));
+        assertTrue(set.contains(4L));
 
-		long[] likes = likeService.getLikes(1, Direction.BOTH, Vote.UP);
-		set = convertArrayToHashSet(likes);
-		assertTrue(set.contains(2L));
-		assertTrue(set.contains(4L));
+        likeService.deleteEdge(1, 2);
 
-		likeService.deleteEdge(1, 2);
+        likes = likeService.getLikes(1, Direction.BOTH, Vote.UP);
+        set = convertArrayToHashSet(likes);
+        assertFalse(set.contains(2L));
+        assertTrue(set.contains(4L));
 
-		likes = likeService.getLikes(1, Direction.BOTH, Vote.UP);
-		set = convertArrayToHashSet(likes);
-		assertFalse(set.contains(2L));
-		assertTrue(set.contains(4L));
+        set = convertArrayToHashSet(likeService.getCommonNodes(1, 2, Vote.UP));
+        assertFalse(set.contains(2L));
+        assertTrue(set.contains(4L));
 
-		set = convertArrayToHashSet(likeService.getCommonNodes(1, 2, Vote.UP));
-		assertFalse(set.contains(2L));
-		assertTrue(set.contains(4L));
-
-		set = convertArrayToHashSet(likeService.getCommonNodes(1, 3, Vote.UP));
-		assertFalse(set.contains(2L));
-		assertTrue(set.contains(4L));
-	}
+        set = convertArrayToHashSet(likeService.getCommonNodes(1, 3, Vote.UP));
+        assertFalse(set.contains(2L));
+        assertTrue(set.contains(4L));
+    }
 
 }

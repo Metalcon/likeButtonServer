@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import de.metalcon.exceptions.MetalconException;
+import de.metalcon.like.server.api.backend.LikeService;
 
 public class LikeServiceTest extends AbstractLikeServiceTest {
 
