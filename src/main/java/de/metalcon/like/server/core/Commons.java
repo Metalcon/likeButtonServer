@@ -102,15 +102,20 @@ class Commons {
     public void friendAdded(final Node friend) {
         updateFriend(friend, true);
 
-        final long[] inNodes = node.getLikesIn(Vote.UP).toArray();
-        if (inNodes != null) {
-            for (long friendUUID : inNodes) {
-                if (friendUUID == 0) {
-                    break;
-                }
-                (NodeFactory.getNode(friendUUID)).updateCommons();
-            }
-        }
+        /*
+         * Instead of frequently running LikeService.updateAllNodes() we could
+         * run following code. The problem here is that big nodes would trigger
+         * these expensive calls much too often.
+         */
+        //        final long[] inNodes = node.getLikesIn(Vote.UP).toArray();
+        //        if (inNodes != null) {
+        //            for (long friendUUID : inNodes) {
+        //                if (friendUUID == 0) {
+        //                    break;
+        //                }
+        //                (NodeFactory.getNode(friendUUID)).updateCommons();
+        //            }
+        //        }
     }
 
     /**

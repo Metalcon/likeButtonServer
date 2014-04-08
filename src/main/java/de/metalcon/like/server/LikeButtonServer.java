@@ -19,7 +19,7 @@ import de.metalcon.like.server.api.frontend.LikeServerWriteRequestHandler;
  * @author Jonas Kunze (kunze.jonas@gmail.com)
  * 
  */
-public class LikeButtonServer {
+public class LikeButtonServer extends Thread {
 
     public final static String FRONTEND_LISTEN_URI = "tcp://*:1003";
 
@@ -56,9 +56,21 @@ public class LikeButtonServer {
                         new LikeServerWriteRequestHandler(service));
     }
 
+    @Override
     public void run() {
-        frontendWorker.start(); // starts thread
-        writeWorker.run(); // blocks this thread
+        frontendWorker.start();
+        writeWorker.start();
+
+        while (true) {
+            long ns = service.updateAllNodes();
+            if (ns < 1E9) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public static void main(final String[] args) {

@@ -29,6 +29,8 @@ public class DeleteEdgeTest extends AbstractLikeServiceTest {
 
         likeService.putEdge(4, 2, Vote.UP);
 
+        likeService.updateAllNodes();
+
         long[] commons = likeService.getCommonNodes(1, 3, Vote.UP);
         HashSet<Long> set = convertArrayToHashSet(commons);
         System.out.println(set);
