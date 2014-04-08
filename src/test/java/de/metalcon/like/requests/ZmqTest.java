@@ -38,9 +38,9 @@ public class ZmqTest {
         //        }
         //
         //        Thread.sleep(100);
-        dispatcher = new Dispatcher();
-
         ZMQ.Context ctx = ZMQ.context(1);
+
+        dispatcher = new Dispatcher();
 
         String serviceID = "serviceID";
         dispatcher.registerServiceAdapter(serviceID,
