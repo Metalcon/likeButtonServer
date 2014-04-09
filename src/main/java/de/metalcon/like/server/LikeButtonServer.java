@@ -21,9 +21,9 @@ import de.metalcon.like.server.api.frontend.LikeServerWriteRequestHandler;
  */
 public class LikeButtonServer extends Thread {
 
-    public final static String FRONTEND_LISTEN_URI = "tcp://*:1003";
+    public final static String FRONTEND_LISTEN_URI = "tcp://*:1234";
 
-    public final static String WRITE_WORKER_LISTEN_URI = "inproc://like";
+    public final static String WRITE_WORKER_LISTEN_URI = "ipc://like";
 
     private final static String STORAGE_DIR = "/dev/shm/likeDB";
 
@@ -40,20 +40,41 @@ public class LikeButtonServer extends Thread {
      */
     private final ZmqWorker<LikeServerRequest, Response> writeWorker;
 
+    private final LikeServerRequestHandler likeRequestHandler;
+
     public LikeButtonServer() throws MetalconException {
         service = new LikeService(STORAGE_DIR);
 
-        ZMQ.Context ctx = ZMQ.context(1);
+        final ZMQ.Context ctx = ZMQ.context(1);
+
+        likeRequestHandler = new LikeServerRequestHandler(ctx, service);
 
         frontendWorker =
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
-                        FRONTEND_LISTEN_URI, new LikeServerRequestHandler(ctx,
-                                service));
+                        FRONTEND_LISTEN_URI, likeRequestHandler);
 
         writeWorker =
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
                         WRITE_WORKER_LISTEN_URI,
                         new LikeServerWriteRequestHandler(service));
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+
+            @Override
+            public void run() {
+                likeRequestHandler.close();
+
+                frontendWorker.close();
+                writeWorker.close();
+                ctx.term();
+                try {
+                    frontendWorker.join();
+                    writeWorker.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
