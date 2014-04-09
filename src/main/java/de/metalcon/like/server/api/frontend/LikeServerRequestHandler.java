@@ -7,7 +7,6 @@ import net.hh.request_dispatcher.service_adapter.ZmqAdapter;
 import org.zeromq.ZMQ;
 
 import de.metalcon.api.responses.Response;
-import de.metalcon.api.responses.SuccessResponse;
 import de.metalcon.api.responses.errors.InternalServerErrorResponse;
 import de.metalcon.like.api.Vote;
 import de.metalcon.like.api.requests.LikeServerAddRelationRequest;
@@ -19,11 +18,12 @@ import de.metalcon.like.api.requests.LikeServerRemoveRelationRequest;
 import de.metalcon.like.api.requests.LikeServerRequest;
 import de.metalcon.like.api.responses.LikeServerMuidListResponse;
 import de.metalcon.like.api.responses.LikeServerVoteResponse;
+import de.metalcon.like.api.responses.RequestQueuedResponse;
 import de.metalcon.like.server.LikeButtonServer;
 import de.metalcon.like.server.api.backend.LikeService;
 
 public class LikeServerRequestHandler implements
-        RequestHandler<LikeServerRequest, Response> {
+        RequestHandler<LikeServerRequest, Response>, AutoCloseable {
 
     private static final long serialVersionUID = 5330271229952005271L;
 
@@ -39,8 +39,8 @@ public class LikeServerRequestHandler implements
         final String writeWorkerID = "WriteWorker";
 
         writeWorkDispatcher.registerServiceAdapter(writeWorkerID,
-                new ZmqAdapter<LikeServerRequest, SuccessResponse>(ctx,
-                        LikeButtonServer.WRITE_WORKER_LISTEN_URI));
+                new ZmqAdapter(ctx, LikeButtonServer.WRITE_WORKER_LISTEN_URI));
+
         writeWorkDispatcher.setDefaultService(
                 LikeServerAddRelationRequest.class, writeWorkerID);
         writeWorkDispatcher.setDefaultService(
@@ -49,7 +49,6 @@ public class LikeServerRequestHandler implements
 
     @Override
     public Response handleRequest(final LikeServerRequest request) {
-
         /*
          * get common nodes
          */
@@ -111,6 +110,11 @@ public class LikeServerRequestHandler implements
          */
         writeWorkDispatcher.execute(request, /* ignore the response */null);
 
-        return null;
+        return new RequestQueuedResponse();
+    }
+
+    @Override
+    public void close() {
+
     }
 }

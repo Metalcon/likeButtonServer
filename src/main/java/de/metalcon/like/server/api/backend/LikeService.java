@@ -7,7 +7,6 @@ import java.util.Set;
 
 import de.metalcon.dbhelper.LevelDbHandler;
 import de.metalcon.exceptions.MetalconException;
-import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.like.api.Direction;
 import de.metalcon.like.api.Vote;
 import de.metalcon.like.server.core.Like;
@@ -46,9 +45,7 @@ public class LikeService implements LikeGraphApi {
     public long[] getCommonNodes(final long from, final long to, final Vote v) {
         Node f = NodeFactory.getNode(from);
         if (f == null) {
-            throw new MetalconRuntimeException(
-                    "Requested getCommonNodes with an unknown from ID");
-            // return null;
+            return null;
         }
         return f.getCommonNodes(to, v);
     }
