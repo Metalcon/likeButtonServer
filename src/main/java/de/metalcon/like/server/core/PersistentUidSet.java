@@ -1,35 +1,33 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.server.core;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import de.metalcon.like.data.Node;
+import de.metalcon.dbhelper.LevelDbHandler;
+import de.metalcon.exceptions.MetalconRuntimeException;
 
 /**
  * @author Jonas Kunze
  */
-public class PersistentUUIDSetLevelDB implements Iterable<Long> {
-	private static LevelDBHandler db;
+public class PersistentUidSet implements Iterable<Long> {
+	private static LevelDbHandler db;
 
-	private final long ID;
+	private final byte[] ID;
 
 	public static void initialize() {
-		db = new LevelDBHandler("PersistentUUIDSetLevelDB");
+		db = new LevelDbHandler("PersistentUUIDSetLevelDB");
 	}
 
-	public PersistentUUIDSetLevelDB(final long ID) {
-		this.ID = ID;
-	}
-
-	public PersistentUUIDSetLevelDB(final String ID) {
-		this.ID = ID.hashCode();
+	public PersistentUidSet(final String ID) {
+		this.ID = db.generateKey(ID);
 	}
 
 	/**
 	 * Adds the given uuid to the end of the file
 	 */
 	public void add(long uuid) {
-		db.setAdd(ID, uuid);
+		db.addToSet(ID, uuid);
 	}
 
 	/**
@@ -37,6 +35,7 @@ public class PersistentUUIDSetLevelDB implements Iterable<Long> {
 	 */
 	public void delete() {
 		// TODO To be implemented
+		throw new MetalconRuntimeException("Not yet implemented");
 	}
 
 	/**
@@ -71,7 +70,7 @@ public class PersistentUUIDSetLevelDB implements Iterable<Long> {
 	}
 
 	public boolean remove(Node n) {
-		return remove(n.getUUID());
+		return remove(n.getUid());
 	}
 
 	/**
@@ -84,9 +83,17 @@ public class PersistentUUIDSetLevelDB implements Iterable<Long> {
 		return db.getLongs(ID);
 	}
 
-	public long size() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int size() {
+		long[] elements = toArray();
+		if (elements == null) {
+			return 0;
+		}
+		return elements.length;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString(toArray());
 	}
 }
 
@@ -100,7 +107,7 @@ class ArrayIterator implements Iterator<Long> {
 
 	@Override
 	public boolean hasNext() {
-		return pos < array.length;
+		return array == null ? false : pos < array.length;
 	}
 
 	@Override

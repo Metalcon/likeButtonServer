@@ -1,24 +1,30 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.server.core;
 
 import java.util.HashMap;
+
+import de.metalcon.dbhelper.ElementNotFoundException;
+import de.metalcon.dbhelper.LevelDbHandler;
+import de.metalcon.exceptions.MetalconRuntimeException;
 
 /**
  * @author Jonas Kunze
  */
-public class PersistentUUIDArrayMapLevelDB {
-	private static final int InitialArrayLength = 4;
+public class PersistentUidMap {
+	LevelDbHandler dbHandler;
 
-	LevelDBHandler dbHandler;
-
-	public PersistentUUIDArrayMapLevelDB(final long keyPrefix) {
-		dbHandler = new LevelDBHandler(keyPrefix);
+	public PersistentUidMap(final String keyPrefix) {
+		dbHandler = new LevelDbHandler(keyPrefix);
 	}
 
 	/**
 	 * @return The timestamp of the last update
 	 */
 	public int getLastUpdateTimeStamp() {
-		return dbHandler.getInt("UpdateTS");
+		try {
+			return dbHandler.getInt("UpdateTS");
+		} catch (ElementNotFoundException e) {
+			return 0;
+		}
 	}
 
 	/**
@@ -36,7 +42,7 @@ public class PersistentUUIDArrayMapLevelDB {
 	 * @param valueUUID
 	 */
 	public void append(final long keyUUID, final long valueUUID) {
-		dbHandler.setAdd(keyUUID, valueUUID);
+		dbHandler.addToSet(keyUUID, valueUUID);
 	}
 
 	/**
@@ -72,9 +78,7 @@ public class PersistentUUIDArrayMapLevelDB {
 	 *            The element to be deleted from the list
 	 */
 	public void remove(final long keyUUID, final long valueUUID) {
-		/*
-		 * TODO To be implemented
-		 */
+		dbHandler.removeFromSet(keyUUID, valueUUID);
 	}
 
 	/**
@@ -84,6 +88,12 @@ public class PersistentUUIDArrayMapLevelDB {
 		/*
 		 * TODO To be implemented
 		 */
+		throw new MetalconRuntimeException("Not yet implemented");
+	}
+
+	@Override
+	public String toString() {
+		return dbHandler.toString();
 	}
 
 }

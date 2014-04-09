@@ -1,4 +1,4 @@
-package de.metalcon.like.storage;
+package de.metalcon.like.server.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,15 +9,17 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.metalcon.domain.MuidConverter;
-import de.metalcon.like.data.Like;
-import de.metalcon.like.data.Like.Vote;
+import de.metalcon.dbhelper.IOHelper;
+import de.metalcon.domain.helper.UidConverter;
+import de.metalcon.exceptions.MetalconException;
+import de.metalcon.like.api.Vote;
 
 /**
  * @author Jonas Kunze
  * 
  */
 public class PersistentLikeHistory {
+
 	/*
 	 * timestamp(4 B), UUID(8 B), flag(1 B)
 	 */
@@ -31,16 +33,14 @@ public class PersistentLikeHistory {
 	/*
 	 * How many chars of the MUID should be used to define the relative path.
 	 * The MUID abcdefghijklm will be stored in following folder for this
-	 * variable set to 3:
-	 * 
-	 * storagedir/m/l/k/abcdefghijklm_likes
+	 * variable set to 3: storagedir/m/l/k/abcdefghijklm_likes
 	 */
 	private static final int storageRecursiveDepth = 3;
 
 	/*
 	 * The maximum number of open file handles allowed.
 	 */
-	private static final int MaximumOpenFileHandles = 10000;
+	private static int MaximumOpenFileHandles = 1000;
 
 	/*
 	 * The number of currently opened file handles
@@ -62,7 +62,9 @@ public class PersistentLikeHistory {
 	 * The first long of each files is the length of the file in bytes
 	 */
 	private RandomAccessFile RAFile = null;
+
 	private MappedByteBuffer file = null;
+
 	private long fileBufferSize = 0;
 
 	/**
@@ -87,12 +89,23 @@ public class PersistentLikeHistory {
 	 * Create all folders that might be used
 	 * 
 	 * @throws IOException
+	 * @throws MetalconException
 	 */
-	public static void initialize(final String storageDir) throws IOException {
+	public static void initialize(final String storageDir)
+			throws MetalconException {
+		File f = new File(storageDir);
+
+		if (!f.exists()) {
+			if (!f.mkdirs()) {
+				throw new MetalconException("Unable to create directory "
+						+ storageDir);
+			}
+		}
+
 		PersistentLikeHistory.storageDir = storageDir;
 
 		char[] counters = new char[storageRecursiveDepth];
-		char[] availableFolderNames = MuidConverter.getAllowedFolderNames();
+		char[] availableFolderNames = UidConverter.getAllowedFolderNames();
 
 		while (true) {
 			String relPath = "";
@@ -101,7 +114,7 @@ public class PersistentLikeHistory {
 			}
 			final File dir = new File(storageDir, relPath);
 			if (!dir.exists() && !dir.mkdirs()) {
-				throw new IOException("Unable to create "
+				throw new MetalconException("Unable to create directory "
 						+ dir.getAbsolutePath());
 			}
 			int j = 0;
@@ -114,9 +127,18 @@ public class PersistentLikeHistory {
 		}
 	}
 
+	public static void clearDataBase(String areYouSure) throws IOException {
+		if (areYouSure.equals("Yes I am")) {
+			File storage = new File(storageDir);
+			if (storage.exists()) {
+				IOHelper.deleteFile(storage);
+			}
+		}
+	}
+
 	private static String generateFileName(final long uuid) {
 
-		return storageDir + "/" + MuidConverter.getMUIDStoragePath(uuid) + uuid
+		return storageDir + "/" + UidConverter.getMuidStoragePath(uuid) + uuid
 				+ "_likes";
 	}
 
@@ -135,13 +157,23 @@ public class PersistentLikeHistory {
 	 * Creates the memory mapped files
 	 */
 	private void openFile() {
-		try {
-			NumberOfOpenFileHandles.addAndGet(1);
-			RAFile = new RandomAccessFile(fileName, "rw");
-			updateMemoryMappedBuffer(RAFile.length());
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+		while (true) {
+			try {
+				NumberOfOpenFileHandles.addAndGet(1);
+				RAFile = new RandomAccessFile(fileName, "rw");
+				updateMemoryMappedBuffer(RAFile.length());
+				return;
+			} catch (IOException e) {
+				/*
+				 * Let other threads close their handles and try again
+				 */
+				e.printStackTrace();
+				MaximumOpenFileHandles *= 0.9;
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+				}
+			}
 		}
 	}
 
@@ -308,8 +340,8 @@ public class PersistentLikeHistory {
 		 */
 		file.position(fileSize);
 		file.putInt(like.getTimestamp());
-		file.putLong(like.getUUID());
-		file.put(like.getVote().value);
+		file.putLong(like.getMUID());
+		file.put(like.getVote().flag);
 		fileSize += BytesPerLikeInFile;
 
 		file.putInt(0, fileSize);
