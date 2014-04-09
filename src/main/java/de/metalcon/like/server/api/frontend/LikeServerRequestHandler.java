@@ -108,7 +108,7 @@ public class LikeServerRequestHandler implements
          * All other request should be write requests -> forward them to the
          * write worker asynchronously
          */
-        writeWorkDispatcher.execute(request, null/* ignore the response */);
+        writeWorkDispatcher.execute(request, /* ignore the response */null);
 
         return new RequestQueuedResponse();
     }

@@ -31,7 +31,7 @@ class Commons {
             final Vote likeType) {
         this.node = node;
         persistentCommonsMap =
-                new PersistentUidMap(node.getMuid() + "" + likeType);
+                new PersistentUidMap(node.getUid() + "" + likeType);
         this.likeType = likeType;
     }
 
@@ -71,25 +71,33 @@ class Commons {
     }
 
     /**
-     * Updates the commons of node and writes the data to disk
+     * Updates the commons of node and writes the data to disk if nod has a
+     * large in degree
      */
-    public void update() {
+    public void updateLargeNode() {
         final int now = (int) (System.currentTimeMillis() / 1000l);
 
         /*
-         * Update all outgoing nodes
+         * Update all incoming nodes if this node is large.
          */
-        final long[] outNodes = node.getLikesOut(Vote.UP).toArray();
-        if (outNodes != null) {
-            for (long friendUUID : outNodes) {
-                if (friendUUID == 0) {
-                    break;
+        final long[] inNodes = node.getLikesIn(Vote.UP).toArray();
+        if (inNodes != null && inNodes.length >= Node.LARGE_NODE_DEGREE) {
+            if (inNodes != null) {
+                for (long friendUUID : inNodes) {
+                    if (friendUUID == 0) {
+                        break;
+                    }
+                    (NodeFactory.getNode(friendUUID)).updateCommons(node
+                            .getUid());
                 }
-                updateFriend(NodeFactory.getNode(friendUUID), false);
             }
         }
 
         persistentCommonsMap.setUpdateTimeStamp(now);
+    }
+
+    public void updateNode(final long likedNode) {
+        updateFriend(NodeFactory.getNode(likedNode), false);
     }
 
     /**
@@ -100,22 +108,26 @@ class Commons {
      *            The friend to be added to the commonsMap
      */
     public void friendAdded(final Node friend) {
+        /*
+         * Update the commons with friend
+         */
         updateFriend(friend, true);
 
         /*
-         * Instead of frequently running LikeService.updateAllNodes() we could
-         * run following code. The problem here is that big nodes would trigger
-         * these expensive calls much too often.
+         * Update all incoming nodes if this node is not too large.
          */
-        //        final long[] inNodes = node.getLikesIn(Vote.UP).toArray();
-        //        if (inNodes != null) {
-        //            for (long friendUUID : inNodes) {
-        //                if (friendUUID == 0) {
-        //                    break;
-        //                }
-        //                (NodeFactory.getNode(friendUUID)).updateCommons();
-        //            }
-        //        }
+        final long[] inNodes = node.getLikesIn(Vote.UP).toArray();
+        if (inNodes == null || inNodes.length < Node.LARGE_NODE_DEGREE) {
+            if (inNodes != null) {
+                for (long friendUUID : inNodes) {
+                    if (friendUUID == 0) {
+                        break;
+                    }
+                    (NodeFactory.getNode(friendUUID)).updateCommons(node
+                            .getUid());
+                }
+            }
+        }
     }
 
     /**
@@ -130,14 +142,14 @@ class Commons {
             /*
              * Remove the friend from the commons list of the liked entity
              */
-            persistentCommonsMap.remove(outID, friend.getMuid());
+            persistentCommonsMap.remove(outID, friend.getUid());
         }
 
         for (long outID : friend.getLikesOut(Vote.DOWN)) {
             /*
              * Remove the friend from the commons list of the liked entity
              */
-            persistentCommonsMap.remove(outID, friend.getMuid());
+            persistentCommonsMap.remove(outID, friend.getUid());
         }
     }
 
@@ -160,15 +172,15 @@ class Commons {
         int searchTS =
                 ignoreTimestamp ? 0 : persistentCommonsMap
                         .getLastUpdateTimeStamp();
-        for (Like like : friend.getLikesFromTimeOn(searchTS)) {
-            if (like.getMUID() == node.getMuid()) {
+        for (Like like : friend.getLikeHistoryFromTimeOn(searchTS)) {
+            if (like.getMUID() == node.getUid()) {
                 continue;
             }
             if (like.getVote() == likeType) {
                 /*
                  * Q1 node -> friend -> likedNode
                  */
-                persistentCommonsMap.append(like.getMUID(), friend.getMuid());
+                persistentCommonsMap.append(like.getMUID(), friend.getUid());
 
                 /*
                  * Q2 node -> likedNode && node -> friend -> likedNode FIXME:
@@ -178,19 +190,19 @@ class Commons {
                  * friend.getLikedNodes()
                  */
                 if (node.getLikesOut(likeType).contains(like.getMUID())) {
-                    persistentCommonsMap.append(friend.getMuid(),
-                            like.getMUID());
+                    persistentCommonsMap
+                            .append(friend.getUid(), like.getMUID());
                 }
             } else {
-                persistentCommonsMap.remove(like.getMUID(), friend.getMuid());
-                persistentCommonsMap.remove(friend.getMuid(), like.getMUID());
+                persistentCommonsMap.remove(like.getMUID(), friend.getUid());
+                persistentCommonsMap.remove(friend.getUid(), like.getMUID());
             }
         }
     }
 
     @Override
     public String toString() {
-        return node.getMuid() + "(" + likeType + "):\n"
+        return node.getUid() + "(" + likeType + "):\n"
                 + persistentCommonsMap.toString();
     }
 }

@@ -14,11 +14,18 @@ public class Node {
     private static final int LastLikeCacheSize = 10;
 
     // Class Variables
-    private final long Muid;
+    private final long Uid;
 
     private final Commons likeCommons;
 
     private final Commons dislikeCommons;
+
+    /*
+     * This defines what large node means. Nodes with this in/out degree will
+     * not be updated during the creation of a new edge. They must be updated
+     * frequently by a special thread.
+     */
+    public static final int LARGE_NODE_DEGREE = 100;
 
     /*
      * lastLikes[lastLikesFirstEntryPointer] is the newest like The list is
@@ -60,36 +67,18 @@ public class Node {
     Node(
             final long muid,
             final boolean isNewNode) {
-        Muid = muid;
-        // commons = new Commons(this, storageDir,
-        // PersistentMuidArrayMap.class);
-
-        // commons = new Commons(this, storageDir,
-        // PersistentMuidArrayMapRedis.class);
-
-        // commons = new Commons(this, storageDir, LazyPersistentMuidMap.class);
+        Uid = muid;
 
         likeCommons = new Commons(this, Vote.UP);
 
         dislikeCommons = new Commons(this, Vote.DOWN);
 
-        // try {
-        // friends = new PersistentMuidSet(storageDir + "/" + Muid
-        // + "_friends");
-        // inNodes = new PersistentMuidSet(storageDir + "/" + Muid
-        // + "_inNodes");
-        //
-        // } catch (IOException e) {
-        // e.printStackTrace();
-        // System.exit(1);
-        // }
+        likedOut = new PersistentUidSet(Uid + "likedOut");
+        likedIn = new PersistentUidSet(Uid + "likedIn");
+        dislikedOut = new PersistentUidSet(Uid + "dislikedOut");
+        dislikedIn = new PersistentUidSet(Uid + "dislikedIn");
 
-        likedOut = new PersistentUidSet(Muid + "likedOut");
-        likedIn = new PersistentUidSet(Muid + "likedIn");
-        dislikedOut = new PersistentUidSet(Muid + "dislikedOut");
-        dislikedIn = new PersistentUidSet(Muid + "dislikedIn");
-
-        likeHistory = new PersistentLikeHistory(Muid);
+        likeHistory = new PersistentLikeHistory(Uid);
     }
 
     /**
@@ -110,7 +99,7 @@ public class Node {
         dislikedOut.delete();
         dislikedIn.delete();
 
-        NodeFactory.removeNodeFromPersistentList(Muid);
+        NodeFactory.removeNodeFromPersistentList(Uid);
 
         likeHistory.delete();
     }
@@ -122,7 +111,7 @@ public class Node {
      *            The time all likes have to be younger than
      * @return An array of the newest likes
      */
-    public Like[] getLikesFromTimeOn(final int timestamp) {
+    public Like[] getLikeHistoryFromTimeOn(final int timestamp) {
         int arrayLength = 10;
         Like[] likesFoundInCache = new Like[arrayLength];
         int likesFoundInCachePointer = 0;
@@ -263,8 +252,8 @@ public class Node {
             likedNode = NodeFactory.createNewNode(like.getMUID());
         }
 
-        addOutNode(likedNode.Muid, like.getVote());
-        likedNode.addInNode(Muid, like.getVote());
+        addOutNode(likedNode.Uid, like.getVote());
+        likedNode.addInNode(Uid, like.getVote());
 
         synchronized (lastLikesCache) {
             if (lastLikesFirstEntryPointer == 0) {
@@ -321,7 +310,7 @@ public class Node {
      * @throws IOException
      */
     public void removeFriendship(final Node friend) throws IOException {
-        addLike(new Like(friend.getMuid(),
+        addLike(new Like(friend.getUid(),
                 (int) System.currentTimeMillis() / 1000, Vote.NEUTRAL));
     }
 
@@ -432,15 +421,29 @@ public class Node {
         return dislikeCommons.getCommonNodes(muid);
     }
 
-    public final long getMuid() {
-        return Muid;
+    /**
+     * 
+     * @return The unique identifyer of this node
+     */
+    public final long getUid() {
+        return Uid;
     }
 
-    protected Commons getCommons() {
-        return likeCommons;
+    /**
+     * Updates commons of incoming nodes with this node if this node has a large
+     * in degree
+     */
+    public void updateLargeNodeCommons() {
+        likeCommons.updateLargeNode();
     }
 
-    public void updateCommons() {
-        likeCommons.update();
+    /**
+     * Update all commons this node has with likedNode
+     * 
+     * @param likedNode
+     *            the freshly liked node
+     */
+    public void updateCommons(final long likedNode) {
+        likeCommons.updateNode(likedNode);
     }
 }
