@@ -26,24 +26,10 @@ import de.metalcon.like.server.LikeButtonServer;
 
 public class ZmqTest {
 
-    private LikeButtonServer server;
-
     private Dispatcher dispatcher;
 
     private ZMQ.Context ctx;
 
-<<<<<<< HEAD
-        //        LikeButtonServer server;
-        //        try {
-        //            server = new LikeButtonServer();
-        //            server.start();
-        //        } catch (MetalconException e) {
-        //            e.printStackTrace();
-        //        }
-        //
-        //        Thread.sleep(100);
-        ZMQ.Context ctx = ZMQ.context(1);
-=======
     @Before
     public void setUpBeforeClass() throws Exception {
         LikeButtonServer server;
@@ -55,9 +41,6 @@ public class ZmqTest {
         }
 
         ctx = ZMQ.context(1);
-
-        dispatcher = new Dispatcher();
->>>>>>> develop
 
         dispatcher = new Dispatcher();
 
