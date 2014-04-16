@@ -3,7 +3,6 @@ package de.metalcon.like.requests;
 import junit.framework.Assert;
 import net.hh.request_dispatcher.Callback;
 import net.hh.request_dispatcher.Dispatcher;
-import net.hh.request_dispatcher.service_adapter.ZmqAdapter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,13 +25,14 @@ import de.metalcon.like.server.LikeButtonServer;
 
 public class ZmqTest {
 
+    private LikeButtonServer server;
+
     private Dispatcher dispatcher;
 
     private ZMQ.Context ctx;
 
     @Before
     public void setUpBeforeClass() throws Exception {
-        LikeButtonServer server;
         try {
             server = new LikeButtonServer();
             server.start();
@@ -44,27 +44,24 @@ public class ZmqTest {
 
         dispatcher = new Dispatcher();
 
-        String serviceID = "serviceID";
-        dispatcher.registerServiceAdapter(serviceID, new ZmqAdapter(ctx,
-                "tcp://localhost:1234"));
-        dispatcher.setDefaultService(LikeServerGetCommonsRequest.class,
-                serviceID);
-        dispatcher.setDefaultService(LikeServerFollowsRequest.class, serviceID);
-        dispatcher.setDefaultService(LikeServerGetLikedLikesRequest.class,
-                serviceID);
+        String endpoint = "tcp://localhost:1234";
+        dispatcher.registerService(LikeServerGetCommonsRequest.class, endpoint);
+        dispatcher.registerService(LikeServerFollowsRequest.class, endpoint);
+        dispatcher.registerService(LikeServerGetLikedLikesRequest.class,
+                endpoint);
+        dispatcher.registerService(LikeServerGetLikesRequest.class, endpoint);
+
+        dispatcher.registerService(LikeServerRemoveRelationRequest.class,
+                endpoint);
+
         dispatcher
-                .setDefaultService(LikeServerGetLikesRequest.class, serviceID);
-
-        dispatcher.setDefaultService(LikeServerRemoveRelationRequest.class,
-                serviceID);
-
-        dispatcher.setDefaultService(LikeServerAddRelationRequest.class,
-                serviceID);
+                .registerService(LikeServerAddRelationRequest.class, endpoint);
     }
 
     @After
     public void tearDown() throws Exception {
-        dispatcher.close();
+        server.interrupt();
+        dispatcher.shutdown();
         ctx.term();
     }
 

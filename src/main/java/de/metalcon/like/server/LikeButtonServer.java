@@ -1,6 +1,6 @@
 package de.metalcon.like.server;
 
-import net.hh.request_dispatcher.server.ZmqWorker;
+import net.hh.request_dispatcher.ZmqWorker;
 
 import org.zeromq.ZMQ;
 
@@ -88,7 +88,7 @@ public class LikeButtonServer extends Thread {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    return;
                 }
             }
         }

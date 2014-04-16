@@ -2,7 +2,7 @@ package de.metalcon.like.server.api.frontend;
 
 import java.io.IOException;
 
-import net.hh.request_dispatcher.server.RequestHandler;
+import net.hh.request_dispatcher.RequestHandler;
 import de.metalcon.api.responses.Response;
 import de.metalcon.exceptions.MetalconRuntimeException;
 import de.metalcon.like.api.requests.LikeServerAddRelationRequest;
