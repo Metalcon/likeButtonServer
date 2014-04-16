@@ -94,6 +94,9 @@ public class LikeButtonServer extends Thread {
         }
     }
 
+    /**
+     * Starts the server with the zmq worker and update thread
+     */
     public static void main(final String[] args) {
         LikeButtonServer server;
         try {

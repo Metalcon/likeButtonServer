@@ -3,9 +3,14 @@
  <parent>
   <groupId>de.metalcon</groupId>
   <artifactId>pom</artifactId>
-  <version>0.0.4</version>
+  <version>0.0.9</version>
  </parent>
 
+
+  <properties>
+     <java.exec.launcherClass>de.metalcon.like.server.LikeButtonServer</java.exec.launcherClass>
+  </properties>
+  
  <modelVersion>4.0.0</modelVersion>
  <artifactId>like-server</artifactId>
  <version>0.3.0</version>
