@@ -1,8 +1,7 @@
 package de.metalcon.like.server.api.frontend;
 
 import net.hh.request_dispatcher.Dispatcher;
-import net.hh.request_dispatcher.server.RequestHandler;
-import net.hh.request_dispatcher.service_adapter.ZmqAdapter;
+import net.hh.request_dispatcher.RequestHandler;
 
 import org.zeromq.ZMQ;
 
@@ -36,15 +35,11 @@ public class LikeServerRequestHandler implements
             final LikeService service) {
         this.service = service;
 
-        final String writeWorkerID = "WriteWorker";
-
-        writeWorkDispatcher.registerServiceAdapter(writeWorkerID,
-                new ZmqAdapter(ctx, LikeButtonServer.WRITE_WORKER_LISTEN_URI));
-
-        writeWorkDispatcher.setDefaultService(
-                LikeServerAddRelationRequest.class, writeWorkerID);
-        writeWorkDispatcher.setDefaultService(
-                LikeServerRemoveRelationRequest.class, writeWorkerID);
+        writeWorkDispatcher.registerService(LikeServerAddRelationRequest.class,
+                LikeButtonServer.WRITE_WORKER_LISTEN_URI);
+        writeWorkDispatcher.registerService(
+                LikeServerRemoveRelationRequest.class,
+                LikeButtonServer.WRITE_WORKER_LISTEN_URI);
     }
 
     @Override
