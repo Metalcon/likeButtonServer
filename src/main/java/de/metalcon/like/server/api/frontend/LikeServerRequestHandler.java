@@ -35,6 +35,8 @@ public class LikeServerRequestHandler implements
             final LikeService service) {
         this.service = service;
 
+        System.out.println("Initializing WriteRequestDispatcher listening on "
+                + Configs.WRITE_WORKER_LISTEN_URI);
         writeWorkDispatcher.registerService(LikeServerAddRelationRequest.class,
                 Configs.WRITE_WORKER_LISTEN_URI);
         writeWorkDispatcher.registerService(
@@ -103,7 +105,8 @@ public class LikeServerRequestHandler implements
          * All other request should be write requests -> forward them to the
          * write worker asynchronously
          */
-        writeWorkDispatcher.execute(request, /* ignore the response */null);
+        //        writeWorkDispatcher.execute(request, /* ignore the response */null);
+        writeWorkDispatcher.executeSync(request);
 
         return new RequestQueuedResponse();
     }

@@ -25,7 +25,7 @@ public class LikeButtonServer extends Thread {
     /**
      * default value for configuration file path
      */
-    protected static final String DEFAULT_CONFIG_PATH =
+    public static final String DEFAULT_CONFIG_PATH =
             "/usr/share/metalcon/like/main.cfg";
 
     private final LikeService service;
@@ -44,6 +44,8 @@ public class LikeButtonServer extends Thread {
     private final LikeServerRequestHandler likeRequestHandler;
 
     public LikeButtonServer() throws MetalconException {
+        System.out.println("Starting Like Button Server listening to "
+                + Configs.FRONTEND_LISTEN_URI);
         service = new LikeService(Configs.STORAGE_DIR);
 
         final ZMQ.Context ctx = ZMQ.context(1);
