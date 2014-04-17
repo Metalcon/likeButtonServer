@@ -3,17 +3,17 @@
  <parent>
   <groupId>de.metalcon</groupId>
   <artifactId>pom</artifactId>
-  <version>0.0.9</version>
+  <version>0.0.10</version>
  </parent>
 
 
-  <properties>
-     <java.exec.launcherClass>de.metalcon.like.server.LikeButtonServer</java.exec.launcherClass>
-  </properties>
-  
+ <properties>
+  <java.exec.launcherClass>de.metalcon.like.server.LikeButtonServer</java.exec.launcherClass>
+ </properties>
+
  <modelVersion>4.0.0</modelVersion>
  <artifactId>like-server</artifactId>
- <version>0.3.0</version>
+ <version>0.3.1</version>
 
  <name>like</name>
  <url>https://github.com/Metalcon/likeButtonServer</url>
@@ -47,7 +47,7 @@
   <dependency>
    <groupId>de.metalcon</groupId>
    <artifactId>db-helper</artifactId>
-   <version>0.1.1</version>
+   <version>${metalcon.dbHelper.version}</version>
   </dependency>
   <dependency>
    <groupId>org.fusesource.leveldbjni</groupId>

@@ -18,8 +18,8 @@ import de.metalcon.like.api.requests.LikeServerRequest;
 import de.metalcon.like.api.responses.LikeServerMuidListResponse;
 import de.metalcon.like.api.responses.LikeServerVoteResponse;
 import de.metalcon.like.api.responses.RequestQueuedResponse;
-import de.metalcon.like.server.LikeButtonServer;
 import de.metalcon.like.server.api.backend.LikeService;
+import de.metalcon.like.server.core.Configs;
 
 public class LikeServerRequestHandler implements
         RequestHandler<LikeServerRequest, Response>, AutoCloseable {
@@ -36,10 +36,10 @@ public class LikeServerRequestHandler implements
         this.service = service;
 
         writeWorkDispatcher.registerService(LikeServerAddRelationRequest.class,
-                LikeButtonServer.WRITE_WORKER_LISTEN_URI);
+                Configs.WRITE_WORKER_LISTEN_URI);
         writeWorkDispatcher.registerService(
                 LikeServerRemoveRelationRequest.class,
-                LikeButtonServer.WRITE_WORKER_LISTEN_URI);
+                Configs.WRITE_WORKER_LISTEN_URI);
     }
 
     @Override

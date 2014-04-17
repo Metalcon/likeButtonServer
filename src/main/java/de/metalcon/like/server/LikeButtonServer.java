@@ -10,6 +10,7 @@ import de.metalcon.like.api.requests.LikeServerRequest;
 import de.metalcon.like.server.api.backend.LikeService;
 import de.metalcon.like.server.api.frontend.LikeServerRequestHandler;
 import de.metalcon.like.server.api.frontend.LikeServerWriteRequestHandler;
+import de.metalcon.like.server.core.Configs;
 
 /**
  * The server is running several threads on the front end. It is designed to
@@ -21,11 +22,11 @@ import de.metalcon.like.server.api.frontend.LikeServerWriteRequestHandler;
  */
 public class LikeButtonServer extends Thread {
 
-    public final static String FRONTEND_LISTEN_URI = "tcp://*:1234";
-
-    public final static String WRITE_WORKER_LISTEN_URI = "ipc://like";
-
-    private final static String STORAGE_DIR = "/dev/shm/likeDB";
+    /**
+     * default value for configuration file path
+     */
+    protected static final String DEFAULT_CONFIG_PATH =
+            "/usr/share/metalcon/like/main.cfg";
 
     private final LikeService service;
 
@@ -43,7 +44,7 @@ public class LikeButtonServer extends Thread {
     private final LikeServerRequestHandler likeRequestHandler;
 
     public LikeButtonServer() throws MetalconException {
-        service = new LikeService(STORAGE_DIR);
+        service = new LikeService(Configs.STORAGE_DIR);
 
         final ZMQ.Context ctx = ZMQ.context(1);
 
@@ -51,11 +52,11 @@ public class LikeButtonServer extends Thread {
 
         frontendWorker =
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
-                        FRONTEND_LISTEN_URI, likeRequestHandler);
+                        Configs.FRONTEND_LISTEN_URI, likeRequestHandler);
 
         writeWorker =
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
-                        WRITE_WORKER_LISTEN_URI,
+                        Configs.WRITE_WORKER_LISTEN_URI,
                         new LikeServerWriteRequestHandler(service));
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -98,6 +99,18 @@ public class LikeButtonServer extends Thread {
      * Starts the server with the zmq worker and update thread
      */
     public static void main(final String[] args) {
+
+        String configPath;
+        if (args.length > 0) {
+            configPath = args[0];
+        } else {
+            configPath = DEFAULT_CONFIG_PATH;
+            System.out
+                    .println("[INFO] using default configuration file path \""
+                            + DEFAULT_CONFIG_PATH + "\"");
+        }
+        Configs.initialize(configPath);
+
         LikeButtonServer server;
         try {
             server = new LikeButtonServer();
