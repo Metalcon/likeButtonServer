@@ -56,6 +56,8 @@ public class LikeButtonServer extends Thread {
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
                         Configs.FRONTEND_LISTEN_URI, likeRequestHandler);
 
+        System.out.println("Starting WriteRequestWorker listening on "
+                + Configs.WRITE_WORKER_LISTEN_URI);
         writeWorker =
                 new ZmqWorker<LikeServerRequest, Response>(ctx,
                         Configs.WRITE_WORKER_LISTEN_URI,

@@ -10,8 +10,10 @@ import org.junit.Test;
 import org.zeromq.ZMQ;
 
 import de.metalcon.api.responses.Response;
-import de.metalcon.domain.Uid;
+import de.metalcon.domain.Muid;
+import de.metalcon.domain.UidType;
 import de.metalcon.exceptions.MetalconException;
+import de.metalcon.exceptions.ServiceOverloadedException;
 import de.metalcon.like.api.Vote;
 import de.metalcon.like.api.requests.LikeServerAddRelationRequest;
 import de.metalcon.like.api.requests.LikeServerFollowsRequest;
@@ -68,7 +70,7 @@ public class ZmqTest {
     }
 
     @Test
-    public void testLikeServer() {
+    public void testLikeServer() throws ServiceOverloadedException {
         final Response[] responses = new Response[2];
 
         //        dispatcher.execute(new LikeServerGetCommonsRequest(Uid.createFromID(0),
@@ -84,8 +86,9 @@ public class ZmqTest {
         //        Assert.assertEquals(responses[0].getClass(),
         //                LikeServerMuidListResponse.class);
 
-        dispatcher.execute(new LikeServerAddRelationRequest(
-                Uid.createFromID(0), Uid.createFromID(1), Vote.UP),
+        dispatcher.execute(
+                new LikeServerAddRelationRequest(Muid.create(UidType.BAND),
+                        Muid.create(UidType.BAND), Vote.UP),
                 new Callback<Response>() {
 
                     @Override
@@ -99,8 +102,8 @@ public class ZmqTest {
                 RequestQueuedResponse.class);
 
         dispatcher.execute(
-                new LikeServerRemoveRelationRequest(Uid.createFromID(0), Uid
-                        .createFromID(1)), new Callback<Response>() {
+                new LikeServerRemoveRelationRequest(Muid.create(UidType.BAND),
+                        Muid.create(UidType.BAND)), new Callback<Response>() {
 
                     @Override
                     public void onSuccess(final Response response) {
