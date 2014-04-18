@@ -67,11 +67,12 @@ public class LikeButtonServer extends Thread {
 
             @Override
             public void run() {
+                ctx.term();
+
                 likeRequestHandler.close();
 
                 frontendWorker.close();
                 writeWorker.close();
-                ctx.term();
                 try {
                     frontendWorker.join();
                     writeWorker.join();
