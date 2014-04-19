@@ -180,6 +180,46 @@ public class PutEdgeTest extends AbstractLikeServiceTest {
                 1);
         assertEquals(likeService.getLikes(1, Direction.OUTGOING, Vote.DOWN)[0],
                 3);
+    }
 
+    @Test
+    public void testUpDown() {
+        assertNull(likeService.getLikes(1, Direction.INCOMING, Vote.UP));
+
+        likeService.putEdge(1, 2, Vote.UP);
+
+        assertEquals(likeService.getLikes(2, Direction.INCOMING, Vote.UP)[0], 1);
+        assertEquals(likeService.getLikes(1, Direction.OUTGOING, Vote.UP)[0], 2);
+
+        likeService.putEdge(1, 2, Vote.DOWN);
+
+        assertEquals(likeService.getLikes(2, Direction.INCOMING, Vote.DOWN)[0],
+                1);
+        assertEquals(likeService.getLikes(1, Direction.OUTGOING, Vote.DOWN)[0],
+                2);
+
+        assertNull(likeService.getLikes(2, Direction.INCOMING, Vote.UP));
+        assertNull(likeService.getLikes(1, Direction.OUTGOING, Vote.UP));
+
+        likeService.putEdge(3, 2, Vote.DOWN);
+
+        assertEquals(
+                likeService.getLikes(2, Direction.INCOMING, Vote.DOWN).length,
+                2);
+        assertEquals(likeService.getLikes(1, Direction.OUTGOING, Vote.DOWN)[0],
+                2);
+        assertEquals(likeService.getLikes(3, Direction.OUTGOING, Vote.DOWN)[0],
+                2);
+
+        likeService.putEdge(3, 2, Vote.UP);
+
+        assertEquals(
+                likeService.getLikes(2, Direction.INCOMING, Vote.DOWN).length,
+                1);
+        assertEquals(
+                likeService.getLikes(2, Direction.INCOMING, Vote.UP).length, 1);
+        assertEquals(likeService.getLikes(1, Direction.OUTGOING, Vote.DOWN)[0],
+                2);
+        assertEquals(likeService.getLikes(3, Direction.OUTGOING, Vote.UP)[0], 2);
     }
 }

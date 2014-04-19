@@ -1,5 +1,7 @@
 package de.metalcon.like.server.api.frontend;
 
+import java.util.Arrays;
+
 import net.hh.request_dispatcher.Dispatcher;
 import net.hh.request_dispatcher.RequestHandler;
 
@@ -64,6 +66,10 @@ public class LikeServerRequestHandler implements
             final LikeServerFollowsRequest r =
                     (LikeServerFollowsRequest) request;
             Vote v = service.follows(r.getFrom(), r.getTo());
+
+            System.out.println("Received follows request " + r.getFrom() + "\t"
+                    + r.getTo() + "\t" + v);
+
             return new LikeServerVoteResponse(v);
         }
 
@@ -82,6 +88,11 @@ public class LikeServerRequestHandler implements
 
             long[] likedNodes =
                     service.getLikes(r.getNode(), r.getDirection(), r.getVote());
+
+            System.out.println("Received getLikesRequest " + r.getNode() + "\t"
+                    + r.getDirection() + "\t" + r.getVote() + ":"
+                    + Arrays.toString(likedNodes));
+
             return new LikeServerMuidListResponse(likedNodes);
         }
 

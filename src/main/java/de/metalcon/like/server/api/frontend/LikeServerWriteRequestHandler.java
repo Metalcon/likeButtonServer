@@ -30,6 +30,8 @@ public class LikeServerWriteRequestHandler implements
         if (request instanceof LikeServerAddRelationRequest) {
             final LikeServerAddRelationRequest r =
                     (LikeServerAddRelationRequest) request;
+            System.out.println("Adding vote " + r.getFrom() + "\t"
+                    + r.getVote() + "\t" + r.getTo());
             service.putEdge(r.getFrom(), r.getTo(), r.getVote());
             return null;
         }
